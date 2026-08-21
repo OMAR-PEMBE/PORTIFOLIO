@@ -1,85 +1,130 @@
 <?php
 
-if(!$_POST) exit;
+declare(strict_types=1);
 
-// Email address verification, do not edit.
-function isEmail($email) {
-	return(preg_match("/^[-_.[:alnum:]]+@((([[:alnum:]]|[[:alnum:]][[:alnum:]-]*[[:alnum:]])\.)+(ad|ae|aero|af|ag|ai|al|am|an|ao|aq|ar|arpa|as|at|au|aw|az|ba|bb|bd|be|bf|bg|bh|bi|biz|bj|bm|bn|bo|br|bs|bt|bv|bw|by|bz|ca|cc|cd|cf|cg|ch|ci|ck|cl|cm|cn|co|com|coop|cr|cs|cu|cv|cx|cy|cz|de|dj|dk|dm|do|dz|ec|edu|ee|eg|eh|er|es|et|eu|fi|fj|fk|fm|fo|fr|ga|gb|gd|ge|gf|gh|gi|gl|gm|gn|gov|gp|gq|gr|gs|gt|gu|gw|gy|hk|hm|hn|hr|ht|hu|id|ie|il|in|info|int|io|iq|ir|is|it|jm|jo|jp|ke|kg|kh|ki|km|kn|kp|kr|kw|ky|kz|la|lb|lc|li|lk|lr|ls|lt|lu|lv|ly|ma|mc|md|me|mg|mh|mil|mk|ml|mm|mn|mo|mp|mq|mr|ms|mt|mu|museum|mv|mw|mx|my|mz|na|name|nc|ne|net|nf|ng|ni|nl|no|np|nr|nt|nu|nz|om|org|pa|pe|pf|pg|ph|pk|pl|pm|pn|pr|pro|ps|pt|pw|py|qa|re|ro|ru|rw|sa|sb|sc|sd|se|sg|sh|si|sj|sk|sl|sm|sn|so|sr|st|su|sv|sy|sz|tc|td|tf|tg|th|tj|tk|tm|tn|to|tp|tr|tt|tv|tw|tz|ua|ug|uk|um|us|uy|uz|va|vc|ve|vg|vi|vn|vu|wf|ws|ye|yt|yu|za|zm|zw)$|(([0-9][0-9]?|[0-1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5])\.){3}([0-9][0-9]?|[0-1][0-9][0-9]|[2][0-4][0-9]|[2][5][0-5]))$/i",$email));
+require_once __DIR__ . '/ResendMailer.php';
+
+function respond(string $message, int $status = 200): void
+{
+    http_response_code($status);
+    header('Content-Type: text/html; charset=utf-8');
+    echo $message;
+    exit;
 }
 
-if (!defined("PHP_EOL")) define("PHP_EOL", "\r\n");
-
-$name     = $_POST['name'];
-$email    = $_POST['email'];
-$phone     = $_POST['phone'];
-$comments = $_POST['comments'];
-
-if(trim($name) == '') {
-	echo '<div class="alert alert-error">You must enter your name.</div>';
-	exit();
-} else if(trim($email) == '') {
-	echo '<div class="alert alert-error">You must enter email address.</div>';
-	exit();
-} else if(!isEmail($email)) {
-	echo '<div class="alert alert-error">You must enter a valid email address.</div>';
-	exit();
-} else if(trim($phone) == '') {
-	echo '<div class="alert alert-error">Please fill all fields!</div>';
-	exit();
-}
-else if(trim($comments) == '') {
-	echo '<div class="alert alert-error">You must enter your comments</div>';
-	exit();
+function configuredEmail(string $name): ?string
+{
+    $value = getenv($name);
+    if ($value === false || trim($value) === '') {
+        return null;
+    }
+    $email = trim($value);
+    return filter_var($email, FILTER_VALIDATE_EMAIL) !== false ? $email : null;
 }
 
-if(get_magic_quotes_gpc()) {
-	$comments = stripslashes($comments);
+function withinLength(string $value, int $maximum): bool
+{
+    return mb_strlen($value, 'UTF-8') <= $maximum;
 }
 
+function consumeRateLimit(string $clientAddress, int $maximum = 5, int $windowSeconds = 900): int
+{
+    $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'portfolio-contact-' . hash('sha256', $clientAddress) . '.json';
+    $handle = @fopen($file, 'c+');
+    if ($handle === false || !flock($handle, LOCK_EX)) {
+        if (is_resource($handle)) {
+            fclose($handle);
+        }
+        return -1;
+    }
 
-// Configuration option.
-// Enter the email address that you want to emails to be sent to.
-// Example $address = "joe.doe@yourdomain.com";
-
-//$address = "example@themeforest.net";
-$address = "Info@yourdomain.com";
-
-
-// Configuration option.
-// i.e. The standard subject will appear as, "You've been contacted by John Doe."
-
-// Example, $e_subject = '$name . ' has contacted you via Your Website.';
-
-$e_subject = 'Contact Form';
-
-
-// Configuration option.
-// You can change this if you feel that you need to.
-// Developers, you may wish to add more fields to the form, in which case you must be sure to add them here.
-
-$e_body = "You have been contacted by $name, their additional message is as follows." . PHP_EOL . PHP_EOL;
-$e_content = "\"$comments\"" . PHP_EOL . PHP_EOL;
-$e_reply = "You can contact $name via email, $email";
-
-$msg = wordwrap( $e_body . $e_content . $e_reply, 70 );
-
-$headers = "From: $email" . PHP_EOL;
-$headers .= "Reply-To: $email" . PHP_EOL;
-$headers .= "MIME-Version: 1.0" . PHP_EOL;
-$headers .= "Content-type: text/plain; charset=utf-8" . PHP_EOL;
-$headers .= "Content-Transfer-Encoding: quoted-printable" . PHP_EOL;
-
-if(mail($address, $e_subject, $msg, $headers)) {
-
-	// Email has sent successfully, echo a success page.
-
-	echo "<div class='alert alert-success'>";
-	echo "<h3>Email Sent Successfully.</h3>";
-	echo "<p>Thank you <strong>$name</strong>, your message has been submitted to us.</p>";
-	echo "</div>";
-
-} else {
-
-	echo 'ERROR!';
-
+    $contents = stream_get_contents($handle);
+    $timestamps = is_string($contents) && $contents !== '' ? json_decode($contents, true) : [];
+    if (!is_array($timestamps)) {
+        $timestamps = [];
+    }
+    $cutoff = time() - $windowSeconds;
+    $timestamps = array_values(array_filter($timestamps, static fn ($value): bool => is_int($value) && $value >= $cutoff));
+    $allowed = count($timestamps) < $maximum;
+    if ($allowed) {
+        $timestamps[] = time();
+        ftruncate($handle, 0);
+        rewind($handle);
+        fwrite($handle, (string) json_encode($timestamps));
+        fflush($handle);
+    }
+    flock($handle, LOCK_UN);
+    fclose($handle);
+    return $allowed ? 1 : 0;
 }
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
+    respond('', 405);
+}
+
+$requestId = bin2hex(random_bytes(16));
+header('X-Request-ID: ' . $requestId);
+
+// Silently accept honeypot submissions so automated senders receive no useful signal.
+if (trim((string) filter_input(INPUT_POST, 'website')) !== '') {
+    error_log((string) json_encode(['event' => 'contact.spam_rejected', 'request_id' => $requestId]));
+    respond('<div class="alert alert-success">Thank you. Your message has been submitted.</div>');
+}
+
+$rateLimit = consumeRateLimit((string) ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+if ($rateLimit === 0) {
+    header('Retry-After: 900');
+    error_log((string) json_encode(['event' => 'contact.rate_limited', 'request_id' => $requestId]));
+    respond('<div class="alert alert-error">Too many messages were submitted. Please try again later.</div>', 429);
+}
+if ($rateLimit < 0) {
+    error_log((string) json_encode(['event' => 'contact.rate_limit_error', 'request_id' => $requestId]));
+    respond('<div class="alert alert-error">The contact form is temporarily unavailable.</div>', 503);
+}
+
+$address = configuredEmail('CONTACT_RECIPIENT');
+$fromAddress = configuredEmail('CONTACT_FROM');
+$apiKey = trim((string) (getenv('RESEND_API_KEY') ?: ''));
+if ($address === null || $fromAddress === null || $apiKey === '') {
+    error_log((string) json_encode(['event' => 'contact.configuration_error', 'request_id' => $requestId]));
+    respond('<div class="alert alert-error">The contact form is temporarily unavailable. Please use the WhatsApp link instead.</div>', 503);
+}
+
+$name = trim((string) filter_input(INPUT_POST, 'name'));
+$email = trim((string) filter_input(INPUT_POST, 'email'));
+$phone = trim((string) filter_input(INPUT_POST, 'phone'));
+$comments = trim((string) filter_input(INPUT_POST, 'comments'));
+
+if ($name === '' || !withinLength($name, 100)) {
+    respond('<div class="alert alert-error">Enter a valid name.</div>', 422);
+}
+if (!filter_var($email, FILTER_VALIDATE_EMAIL) || !withinLength($email, 254)) {
+    respond('<div class="alert alert-error">Enter a valid email address.</div>', 422);
+}
+if ($phone === '' || !withinLength($phone, 40)) {
+    respond('<div class="alert alert-error">Enter a valid phone number.</div>', 422);
+}
+if ($comments === '' || !withinLength($comments, 5000)) {
+    respond('<div class="alert alert-error">Enter a message of no more than 5,000 characters.</div>', 422);
+}
+
+$message = [
+    'from' => 'Portfolio Website <' . $fromAddress . '>',
+    'to' => [$address],
+    'reply_to' => $email,
+    'subject' => 'Portfolio contact from ' . $name,
+    'text' => "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\n\n{$comments}",
+];
+
+$delivery = (new ResendMailer($apiKey))->send($message, $requestId);
+if (!$delivery->successful) {
+    respond('<div class="alert alert-error">Unable to send your message right now. Please try again later.</div>', 502);
+}
+
+$safeName = htmlspecialchars($name, ENT_QUOTES | ENT_SUBSTITUTE, 'UTF-8');
+respond(
+    "<div class='alert alert-success'>"
+    . '<h3>Email Sent Successfully.</h3>'
+    . "<p>Thank you <strong>{$safeName}</strong>, your message has been submitted.</p>"
+    . '</div>'
+);

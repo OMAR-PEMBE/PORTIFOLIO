@@ -1,0 +1,9 @@
+{
+  "name": "omar-pembe-portfolio-php",
+  "private": true,
+  "scripts": {
+    "assets:report": "node scripts/asset-report.mjs",
+    "test": "node scripts/regression-test.mjs",
+    "check": "npm test && npm run assets:report"
+  }
+}

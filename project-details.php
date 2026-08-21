@@ -1,55 +1,15 @@
 <?php
-$projects = [
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/iot.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/poster3.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/star.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/skill.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/subo.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/mazola.jpg',
-    ],
-    
-       [
-        'type' => 'image',
-        'file' => 'assets/img/projects/iot.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/poster3.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/star.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/skill.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/subo.jpg',
-    ],
-    [
-        'type' => 'image',
-        'file' => 'assets/img/projects/mazola.jpg',
-    ],
-];
+declare(strict_types=1);
+$projects = require __DIR__ . '/data/projects.php';
+$requestedSlug = isset($_GET['project']) ? (string) $_GET['project'] : '';
+if (!isset($projects[$requestedSlug])) {
+    $requestedSlug = (string) array_key_first($projects);
+}
+$project = $projects[$requestedSlug];
+$slugs = array_keys($projects);
+$position = array_search($requestedSlug, $slugs, true);
+$previousSlug = $slugs[($position - 1 + count($slugs)) % count($slugs)];
+$nextSlug = $slugs[($position + 1) % count($slugs)];
 ?>
 
 <!DOCTYPE html>
@@ -64,12 +24,12 @@ $projects = [
 
     <!-- ========== Page Title ========== -->
       <!-- ========== Page Title ========== -->
-    <title>Omar S Pembe - Personal Portfolio</title>
+    <title><?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?> | Omar S Pembe</title>
 
     <!-- ========== Favicon Icon ========== -->
     <link rel="shortcut icon" href="assets/img/icon/logo2.png" type="image/x-icon">
 
-o    <!-- ========== Start Stylesheet ========== -->
+    <!-- ========== Start Stylesheet ========== -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
     <link href="assets/css/font-awesome.min.css" rel="stylesheet">
     <link href="assets/css/magnific-popup.css" rel="stylesheet">
@@ -117,7 +77,7 @@ o    <!-- ========== Start Stylesheet ========== -->
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
                         <i class="fa fa-bars"></i>
                     </button>
-                    <a class="navbar-brand" href="index.html">
+                    <a class="navbar-brand" href="index.php">
                         <img src="assets/img/icon/logo2.png" class="logo" alt="Logo">
                     </a>
                 </div>
@@ -126,7 +86,7 @@ o    <!-- ========== Start Stylesheet ========== -->
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="navbar-menu">
 
-                    <img src="assets/img/icon/logo3.png" alt="Logo">
+                    <img src="assets/img/icon/logo2.png" alt="Logo">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
                         <i class="fa fa-times"></i>
                     </button>
@@ -137,16 +97,16 @@ o    <!-- ========== Start Stylesheet ========== -->
                         </li>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">What I Do</a>
+                            <a class="smooth-menu" href="index.php#services">What I Do</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">Portfolio</a>
+                            <a class="smooth-menu" href="index.php#portfolio">Portfolio</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">Resume</a>
+                            <a class="smooth-menu" href="index.php#resume">Resume</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">contact</a>
+                            <a class="smooth-menu" href="index.php#contact">contact</a>
                         </li>
                     </ul>
                 </div><!-- /.navbar-collapse -->
@@ -157,7 +117,7 @@ o    <!-- ========== Start Stylesheet ========== -->
                         <div class="attr-nav attr-box">
                             <ul>
                                 <li class="button">
-                                    <a class="smooth-menu" href="#contact">Work With Me<i class="fas fa-comment-alt"></i></a>
+                                    <a class="smooth-menu" href="index.php#contact">Work With Me<i class="fas fa-comment-alt"></i></a>
                                 </li>
                             </ul>
                         </div>
@@ -180,7 +140,7 @@ o    <!-- ========== Start Stylesheet ========== -->
         <div class="container">
             <div class="row">
                 <div class="col-xl-6 offset-xl-3 col-lg-8 offset-lg-2">
-                    <h1>Main Project - Title</h1>
+                    <h1><?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?></h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li><a href="projects.php"><i class="fas fa-home"></i> Home</a></li>
@@ -203,32 +163,21 @@ o    <!-- ========== Start Stylesheet ========== -->
                     <div class="col-xl-4 col-lg-5 left-info mb-xs-40 mb-md-50">
                         <div class="project-single-info">
                             <ul>
-                                <li>
-                                    Client <span>themeforest.validthemes.com</span>
-                                </li>
-                                <li>
-                                    Date <span>25 February, 2022</span>
-                                </li>
-                                <li>
-                                    Service <span>Web Development</span>
-                                </li>
-                                <li>
-                                    Address <span>1401, 21st Street STE R4569, California</span>
-                                </li>
+                                <li>Client <span><?= htmlspecialchars((string) $project['client'], ENT_QUOTES, 'UTF-8') ?></span></li>
+                                <li>Date <span><?= htmlspecialchars((string) $project['date'], ENT_QUOTES, 'UTF-8') ?></span></li>
+                                <li>Service <span><?= htmlspecialchars((string) $project['service'], ENT_QUOTES, 'UTF-8') ?></span></li>
+                                <li>Location <span><?= htmlspecialchars((string) $project['location'], ENT_QUOTES, 'UTF-8') ?></span></li>
                             </ul>
                         </div>
                     </div>
-    
                     <div class="right-info col-xl-8 col-lg-7 pl-50 pl-md-15 pl-xs-15 mt-md-10">
-                        <h2>Description</h2>
-                        <p>
-                            Netus lorem rutrum arcu dignissim at sit morbi phasellus nascetur eget urna potenti cum vestibulum cras. Tempor nonummy metus lobortis. Sociis velit etiam, dapibus. Lectus vehicula pellentesque cras posuere tempor facilisi habitant lectus rutrum pede quisque hendrerit parturient posuere mauris ad elementum fringilla facilisi volutpat fusce pharetra felis sapien varius quisque class convallis praesent est sollicitudin donec nulla venenatis, cursus fermentum netus posuere sociis porta risus habitant malesuada nulla habitasse hymenaeos.
-                        </p>
-                        <p>
-                            Give lady of they such they sure it. Me contained explained my education. Vulgar as hearts by garret. Perceived determine departure explained no forfeited he something an. Contrasted dissimilar get joy you instrument out reasonably. Again keeps at no meant stuff. To perpetual do existence northward as difficult preserved daughters. Continued at up to zealously necessary breakfast. Surrounded sir motionless she end literature. convallis praesent est sollicitudin donec nulla venenatis, cursus fermentum.
-                        </p>
+                        <h2>Background</h2>
+                        <p><?= htmlspecialchars((string) $project['background'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <h2>Challenges</h2>
+                        <p><?= htmlspecialchars((string) $project['challenges'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <h2>Solution</h2>
+                        <p><?= htmlspecialchars((string) $project['solution'], ENT_QUOTES, 'UTF-8') ?></p>
                     </div>
-                    
                 </div>
             </div>
         </div>
@@ -239,17 +188,10 @@ o    <!-- ========== Start Stylesheet ========== -->
                 <div class="col-md-12 gallery-content">
                     <div class="magnific-mix-gallery gallery-masonary">
                         <div id="gallery-masonary" class="gallery-items colums-3">
-                            <?php foreach($projects as $project): ?>
+                            <?php foreach ($project['gallery'] as $image): ?>
                             <div class="gallery-item">
                                 <div class="gallery-style-one">
-                                    <?php if($project['type'] === 'video'): ?>
-                                        <video controls class="project-media">
-                                            <source src="<?php echo $project['file']; ?>" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    <?php else: ?>
-                                        <img src="<?php echo $project['file']; ?>" alt="Project Thumbnail" class="project-media">
-                                    <?php endif; ?>
+                                    <img src="<?= htmlspecialchars((string) $image, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?> project image" class="project-media" loading="lazy" decoding="async">
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -272,7 +214,7 @@ o    <!-- ========== Start Stylesheet ========== -->
                         <h2>Hello👋i'm open for freelance work and collaborations</h2>
                         <h4>For quick response: <a href="http://wa.me/255620272880" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Chat now</a></h4>
                         <div class="button mt-40">
-                            <a class="btn-style-regular" href="#contact"><span>Hire Me Now </span> <i class="fas fa-arrow-right"></i></a>
+                            <a class="btn-style-regular" href="index.php#contact"><span>Hire Me Now </span> <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                 </div>
@@ -288,12 +230,12 @@ o    <!-- ========== Start Stylesheet ========== -->
             <div class="row">
                 <div class="col-lg-8 offset-lg-2">
                     <div class="footer-items text-center">
-                        <a href="#" class="footer-logot"><img src="assets/img/icon/logo2.png" alt="Image Not Found"></a>
+                        <a href="index.php" class="footer-logot"><img src="assets/img/icon/logo2.png" alt="Omar Pembe portfolio visual"></a>
                         <ul class="foter-menu">
                             <li><a href="index.php">Home</a></li>
                             <li><a class="smooth-menu" href="#services">What I Do</a></li>
                             <li><a class="smooth-menu" href="#portfolio">Portfolio</a></li>
-                            <li><a class="smooth-menu" href="#contact">Contact</a></li>
+                            <li><a class="smooth-menu" href="index.php#contact">Contact</a></li>
                         </ul>
                         <p>Copyright &copy; 2025 Omar Suleiman Pembe. All Rights Reserved</p>
                     </div>
@@ -324,6 +266,9 @@ o    <!-- ========== Start Stylesheet ========== -->
     <script src="assets/js/jquery.lettering.min.js"></script>
     <script src="assets/js/jquery.circleType.js"></script>
     <script src="assets/js/typed.js"></script>
+    <script src="assets/js/features/ui.js"></script>
+    <script src="assets/js/features/portfolio.js"></script>
+    <script src="assets/js/features/animations.js"></script>
     <script src="assets/js/main.js"></script>
 
 </body>

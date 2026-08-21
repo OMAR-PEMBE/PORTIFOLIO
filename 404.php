@@ -83,7 +83,7 @@
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
                         <i class="fa fa-bars"></i>
                     </button>
-                    <a class="navbar-brand" href="index.html">
+                    <a class="navbar-brand" href="index.php">
                         <img src="assets/img/logo.png" class="logo" alt="Logo">
                     </a>
                 </div>
@@ -99,26 +99,26 @@
                     
                     <ul class="nav navbar-nav navbar-right" data-in="fadeInDown" data-out="fadeOutUp">
                         <li class="dropdown">
-                            <a href="index.html" class="dropdown-toggle active" data-toggle="dropdown" >Home</a>
+                            <a href="index.php" class="dropdown-toggle active" data-toggle="dropdown" >Home</a>
                             <ul class="dropdown-menu">
-                                <li><a href="index.html">Home Version Light</a></li>
-                                <li><a href="index-dark.html">Home Version Dark</a></li>
+                                <li><a href="index.php">Home Version Light</a></li>
+                                <li><a href="index.php">Home Version Dark</a></li>
                             </ul>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="service.html">Services</a>
+                            <a class="smooth-menu" href="index.php#services">Services</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="projects.html">Portfolio</a>
+                            <a class="smooth-menu" href="projects.php">Portfolio</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="resume.html">Resume</a>
+                            <a class="smooth-menu" href="index.php#resume">Resume</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="pricing.html">Pricing</a>
+                            <a class="smooth-menu" href="index.php#services">Pricing</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="contact.html">contact</a>
+                            <a class="smooth-menu" href="index.php#contact">contact</a>
                         </li>
                     </ul>
                 </div><!-- /.navbar-collapse -->
@@ -129,7 +129,7 @@
                         <div class="attr-nav attr-box">
                             <ul>
                                 <li class="button">
-                                    <a href="#">Let's Talk <i class="fas fa-comment-alt"></i></a>
+                                    <a href="index.php#contact">Let's Talk <i class="fas fa-comment-alt"></i></a>
                                 </li>
                             </ul>
                         </div>
@@ -163,7 +163,7 @@
                         <p>
                             Household shameless incommode at no objection behaviour. Especially do at he possession insensible sympathize boisterous it. Songs he on an widen me event truth.
                         </p>
-                        <a class="btn mt-20 btn-md btn-theme" href="index.html">Back to home</a>
+                        <a class="btn mt-20 btn-md btn-theme" href="index.php">Back to home</a>
                     </div>
                 </div>
             </div>
@@ -179,13 +179,13 @@
             <div class="row">
                 <div class="col-lg-8 offset-lg-2">
                     <div class="footer-items text-center">
-                        <a href="#" class="footer-logot"><img src="assets/img/logo.png" alt="Image Not Found"></a>
+                        <a href="index.php#contact" class="footer-logot"><img src="assets/img/logo.png" alt="Omar Pembe portfolio visual"></a>
                         <ul class="foter-menu">
-                            <li><a href="index.html">Home</a></li>
-                            <li><a href="service.html">Services</a></li>
-                            <li><a href="projects.html">Portfolio</a></li>
-                            <li><a href="blog-with-sidebar.html">Blog</a></li>
-                            <li><a href="contact.html">Contact</a></li>
+                            <li><a href="index.php">Home</a></li>
+                            <li><a href="index.php#services">Services</a></li>
+                            <li><a href="projects.php">Portfolio</a></li>
+                            <li><a href="index.php">Blog</a></li>
+                            <li><a href="index.php#contact">Contact</a></li>
                         </ul>
                         <p>Copyright &copy; 2024 Antux. All Rights Reserved</p>
                     </div>
@@ -216,6 +216,8 @@
     <script src="assets/js/jquery.lettering.min.js"></script>
     <script src="assets/js/jquery.circleType.js"></script>
     <script src="assets/js/typed.js"></script>
+    <script src="assets/js/features/ui.js"></script>
+    <script src="assets/js/features/animations.js"></script>
     <script src="assets/js/main.js"></script>
 
 </body>

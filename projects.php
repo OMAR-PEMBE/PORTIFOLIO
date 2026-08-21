@@ -1,68 +1,6 @@
 <?php
-$projects = [
-    [
-        'title' => '4SITE Programme Mzumbe Univ',
-        'type' => 'image',
-        'file' => 'assets/img/projects/iot.jpg',
-    ],
-    [
-        'title' => 'Borntz Eagle Brand',
-        'type' => 'image',
-        'file' => 'assets/img/projects/poster3.jpg',
-    ],
-    [
-        'title' => 'Golden Star Consultants',
-        'type' => 'image',
-        'file' => 'assets/img/projects/star.jpg',
-    ],
-    [
-        'title' => 'MasteredX Academy',
-        'type' => 'image',
-        'file' => 'assets/img/projects/skill.jpg',
-    ],
-    [
-        'title' => 'Subo Insurance Agency',
-        'type' => 'image',
-        'file' => 'assets/img/projects/subo.jpg',
-    ],
-    [
-        'title' => 'Mazola Diamond Hotel',
-        'type' => 'image',
-        'file' => 'assets/img/projects/mazola.jpg',
-    ],
-    
-       [
-        'title' => '4SITE Programme Mzumbe Univ',
-        'type' => 'image',
-        'file' => 'assets/img/projects/iot.jpg',
-    ],
-    [
-        'title' => 'Borntz Eagle Brand',
-        'type' => 'image',
-        'file' => 'assets/img/projects/poster3.jpg',
-    ],
-    [
-        'title' => 'Golden Star Consultants',
-        'type' => 'image',
-        'file' => 'assets/img/projects/star.jpg',
-    ],
-    [
-        'title' => 'MasteredX Academy',
-        'type' => 'image',
-        'file' => 'assets/img/projects/skill.jpg',
-    ],
-    [
-        'title' => 'Subo Insurance Agency',
-        'type' => 'image',
-        'file' => 'assets/img/projects/subo.jpg',
-    ],
-    [
-        'title' => 'Mazola Diamond Hotel',
-        'type' => 'image',
-        'file' => 'assets/img/projects/mazola.jpg',
-    ],
-    
-];
+declare(strict_types=1);
+$projects = require __DIR__ . '/data/projects.php';
 ?>
 
 <!DOCTYPE html>
@@ -79,7 +17,7 @@ $projects = [
     <title>Omar S Pembe - Personal Portfolio</title>
 
     <!-- ========== Favicon Icon ========== -->
-    <link rel="shortcut icon" href="assets/img/icon/logo2" type="image/x-icon">
+    <link rel="shortcut icon" href="assets/img/icon/logo2.png" type="image/x-icon">
 
     <!-- ========== Start Stylesheet ========== -->
     <link href="assets/css/bootstrap.min.css" rel="stylesheet">
@@ -153,16 +91,16 @@ $projects = [
                         </li>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">What I Do</a>
+                            <a class="smooth-menu" href="index.php#services">What I Do</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">Portfolio</a>
+                            <a class="smooth-menu" href="index.php#portfolio">Portfolio</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">Resume</a>
+                            <a class="smooth-menu" href="index.php#resume">Resume</a>
                         </li>
                         <li>
-                            <a class="smooth-menu" href="index.php">contact</a>
+                            <a class="smooth-menu" href="index.php#contact">contact</a>
                         </li>
                     </ul>
                 </div>
@@ -217,26 +155,7 @@ $projects = [
                 <div class="col-md-12 gallery-content">
                     <div class="magnific-mix-gallery gallery-masonary">
                         <div id="gallery-masonary" class="gallery-items colums-3">
-                            <?php foreach($projects as $project): ?>
-                            <div class="gallery-item">
-                                <div class="gallery-style-one">
-                                    <?php if($project['type'] === 'video'): ?>
-                                        <video controls class="project-media">
-                                            <source src="<?php echo $project['file']; ?>" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    <?php else: ?>
-                                        <img src="<?php echo $project['file']; ?>" alt="Project Thumbnail" class="project-media">
-                                    <?php endif; ?>
-                                    <div class="info">
-                                        <div class="overlay">
-                                            <div class="content"></div>
-                                        </div>
-                                        <h4><a href="project-details.php"><?php echo $project['title']; ?></a></h4>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
+                            <?php foreach ($projects as $slug => $project) { include __DIR__ . '/includes/render-project-card.php'; } ?>
                         </div>
                     </div>
                 </div>
@@ -255,7 +174,7 @@ $projects = [
                         <h2>Hello👋i'm open for freelance work and collaborations</h2>
                         <h4>For quick response: <a href="http://wa.me/255620272880" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Chat now</a></h4>
                         <div class="button mt-40">
-                            <a class="btn-style-regular" href="#contact"><span>Hire Me Now </span> <i class="fas fa-arrow-right"></i></a>
+                            <a class="btn-style-regular" href="index.php#contact"><span>Hire Me Now </span> <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
                 </div>
@@ -273,8 +192,8 @@ $projects = [
                     <div class="footer-items text-center">
                         <ul class="foter-menu">
                             <li><a href="index.php">Home</a></li>
-                            <li><a href="index.php">What I Do</a></li>
-                            <li><a href="index.php">Portfolio</a></li>
+                            <li><a href="index.php#services">What I Do</a></li>
+                            <li><a href="index.php#portfolio">Portfolio</a></li>
                             <li><a href="index.php">Contact</a></li>
                         </ul>
                         <p>Copyright &copy; 2025 Omar Suleiman Pembe. All Rights Reserved</p>
@@ -306,6 +225,9 @@ $projects = [
     <script src="assets/js/jquery.lettering.min.js"></script>
     <script src="assets/js/jquery.circleType.js"></script>
     <script src="assets/js/typed.js"></script>
+    <script src="assets/js/features/ui.js"></script>
+    <script src="assets/js/features/portfolio.js"></script>
+    <script src="assets/js/features/animations.js"></script>
     <script src="assets/js/main.js"></script>
 
 </body>

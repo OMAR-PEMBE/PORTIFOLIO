@@ -1,57 +1,6 @@
 <?php
-// PHP code to process contact form
-if(isset($_POST['submit'])) {
-    $name = $_POST['name'];
-    $email = $_POST['email'];
-    $message = $_POST['message'];
-
-    $to = "omarpembe999@gmail.com";
-    $subject = "New message from portfolio website";
-    $body = "Name: $name\nEmail: $email\n\nMessage:\n$message";
-    $headers = "From: $email";
-
-    if(mail($to, $subject, $body, $headers)) {
-        $success = "Message sent successfully!";
-    } else {
-        $error = "Sorry, message could not be sent.";
-    }
-}
-?>
-
-<?php
-$projects = [
-    [
-        'title' => '4SITE Programme Mzumbe Univ',
-        'type' => 'image',
-        'file' => 'assets/img/projects/iot.jpg',
-    ],
-    [
-        'title' => 'Borntz Eagle Brand',
-        'type' => 'image',
-        'file' => 'assets/img/projects/poster3.jpg',
-    ],
-    [
-        'title' => 'Golden Star Consultants',
-        'type' => 'image',
-        'file' => 'assets/img/projects/star.jpg',
-    ],
-    [
-        'title' => 'MasteredX Academy',
-        'type' => 'image',
-        'file' => 'assets/img/projects/skill.jpg',
-    ],
-    [
-        'title' => 'Subo Insurance Agency',
-        'type' => 'image',
-        'file' => 'assets/img/projects/subo.jpg',
-    ],
-    [
-        'title' => 'Mazola Diamond Hotel',
-        'type' => 'image',
-        'file' => 'assets/img/projects/mazola.jpg',
-    ],
-    
-];
+declare(strict_types=1);
+$projects = require __DIR__ . '/data/projects.php';
 ?>
 
 
@@ -198,7 +147,7 @@ $projects = [
 
     <!-- Start Banner 
     ============================================= -->
-    <div class="banner-style-one-area bg-gray" style="background-image: url(assets/img/shape/4.png);">
+    <div id="home" class="banner-style-one-area bg-gray" style="background-image: url(assets/img/shape/4.png);">
         <div class="container">
             <div class="row align-items-center">
                 <div class="col-lg-12">
@@ -241,7 +190,7 @@ $projects = [
                             </div>
                         </div>
                         <div class="thumb">
-                            <img src="assets/img/illustration/112.png" alt="Image Not Found">
+                            <img src="assets/img/illustration/112.png" alt="Omar Pembe portfolio visual">
                     </div>
                     </div>
                 </div>
@@ -254,8 +203,8 @@ $projects = [
     ============================================= -->
     <div id="about" class="about-style-one-area bg-gray default-padding">
         <div class="shape-style-one">
-            <img src="assets/img/shape/3.png" alt="Image Not Found">
-            <img class="upDownScrol" src="assets/img/shape/8.png" alt="Image Not Found">
+            <img src="assets/img/shape/3.png" alt="Omar Pembe portfolio visual">
+            <img class="upDownScrol" src="assets/img/shape/8.png" alt="Omar Pembe portfolio visual">
         </div>
         <div class="container">
             <div class="row">
@@ -282,7 +231,7 @@ $projects = [
                         <p class="split-text">
                             As a versatile digital creative with 5 years of experience, I specialize in web development, graphics design, social media management, and UI/UX design. I create responsive, user-friendly websites with modern designs, craft impactful visuals, manage engaging online strategies, and design seamless user experiences. My passion is transforming ideas into functional, visually appealing, and results-driven digital solutions.
                         </p>
-                        <a class="btn-style-regular btn-border" href="#"><span>Learn More</span> <i class="fas fa-arrow-right"></i></a>
+                        <a class="btn-style-regular btn-border" href="#services"><span>Learn More</span> <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
             </div>
@@ -306,8 +255,8 @@ $projects = [
                 <!-- Single Item -->
                 <div class="col-xl-3 col-md-6 mb-30 wow fadeInUp">
                     <div class="service-style-one-item">
-                        <img src="assets/img/icon/1.png" alt="Image Not Found">
-                        <h4><a href="services-details.php">Web Development</a></h4>
+                        <img src="assets/img/icon/1.png" alt="Omar Pembe portfolio visual">
+                        <h4><a href="#contact">Web Development</a></h4>
                         <p>
                             I design and develop responsive, fast, and user-friendly websites that combine modern design with efficient functionality. From business websites to personal portfolios, I create solutions that help you stand out online.
                         </p>
@@ -317,8 +266,8 @@ $projects = [
                  <!-- Single Item -->
                 <div class="col-xl-3 col-md-6 mb-30 active wow fadeInUp" data-wow-delay="200ms">
                     <div class="service-style-one-item active">
-                        <img src="assets/img/icon/2.png" alt="Image Not Found">
-                        <h4><a href="services-details.php">UI/UX Design</a></h4>
+                        <img src="assets/img/icon/2.png" alt="Omar Pembe portfolio visual">
+                        <h4><a href="#contact">UI/UX Design</a></h4>
                         <p>
                             I design seamless user experiences with a focus on usability and aesthetics. My goal is to make digital products that not only look great but also provide smooth navigation and functionality.
                         </p>
@@ -328,8 +277,8 @@ $projects = [
                  <!-- Single Item -->
                 <div class="col-xl-3 col-md-6 mb-30 wow fadeInUp" data-wow-delay="400ms">
                     <div class="service-style-one-item">
-                        <img src="assets/img/icon/3.png" alt="Image Not Found">
-                        <h4><a href="services-details.php">Graphics Design</a></h4>
+                        <img src="assets/img/icon/3.png" alt="Omar Pembe portfolio visual">
+                        <h4><a href="#contact">Graphics Design</a></h4>
                         <p>
                             I create professional and eye-catching visuals including logos, posters, social media creatives, and branding materials that effectively communicate your message and identity.
                         </p>
@@ -339,8 +288,8 @@ $projects = [
                  <!-- Single Item -->
                 <div class="col-xl-3 col-md-6 mb-30 wow fadeInUp" data-wow-delay="600ms">
                     <div class="service-style-one-item">
-                        <img src="assets/img/icon/4.png" alt="Image Not Found">
-                        <h4><a href="services-details.html">Social Media Management</a></h4>
+                        <img src="assets/img/icon/4.png" alt="Omar Pembe portfolio visual">
+                        <h4><a href="#contact">Social Media Management</a></h4>
                         <p>
                             I help businesses and individuals grow their audience by managing social media accounts, creating content strategies, and running impactful campaigns that boost visibility and interaction.
                         </p>
@@ -354,7 +303,7 @@ $projects = [
 
     <!-- Start Portfolio 
     ============================================= -->
-        <div class="container">
+        <div id="portfolio" class="container">
             <div class="row">
                 <div class="col-lg-8 offset-lg-2">
                     <div class="site-heading text-center">
@@ -367,26 +316,7 @@ $projects = [
                 <div class="col-md-12 gallery-content">
                     <div class="magnific-mix-gallery gallery-masonary">
                         <div id="gallery-masonary" class="gallery-items colums-3">
-                            <?php foreach($projects as $project): ?>
-                            <div class="gallery-item">
-                                <div class="gallery-style-one">
-                                    <?php if($project['type'] === 'video'): ?>
-                                        <video controls class="project-media">
-                                            <source src="<?php echo $project['file']; ?>" type="video/mp4">
-                                            Your browser does not support the video tag.
-                                        </video>
-                                    <?php else: ?>
-                                        <img src="<?php echo $project['file']; ?>" alt="Project Thumbnail" class="project-media">
-                                    <?php endif; ?>
-                                    <div class="info">
-                                        <div class="overlay">
-                                            <div class="content"></div>
-                                        </div>
-                                        <h4><a href="project-details.php"><?php echo $project['title']; ?></a></h4>
-                                    </div>
-                                </div>
-                            </div>
-                            <?php endforeach; ?>
+                            <?php foreach ($projects as $slug => $project) { include __DIR__ . '/includes/render-project-card.php'; } ?>
                         </div>
                         <div class="row">
                             <div class="col-lg-12 text-center">
@@ -422,7 +352,7 @@ $projects = [
                 <!-- Single item -->
                 <div class="funfact-style-two-item wow fadeInUp">
                     <div class="icon">
-                        <img src="assets/img/icon/figma.png" alt="Image Not Found">
+                        <img src="assets/img/icon/figma.png" alt="Omar Pembe portfolio visual">
                     </div>
                     <div class="fun-fact">
                         <div class="counter">
@@ -437,7 +367,7 @@ $projects = [
                 <!-- Single item -->
                 <div class="funfact-style-two-item wow fadeInUp" data-wow-delay="100ms">
                     <div class="icon">
-                        <img src="assets/img/icon/JS.png" alt="Image Not Found">
+                        <img src="assets/img/icon/JS.png" alt="Omar Pembe portfolio visual">
                     </div>
                     <div class="fun-fact">
                         <div class="counter">
@@ -452,7 +382,7 @@ $projects = [
                 <!-- Single item -->
                 <div class="funfact-style-two-item wow fadeInUp" data-wow-delay="200ms">
                     <div class="icon">
-                        <img src="assets/img/icon/PY.png" alt="Image Not Found">
+                        <img src="assets/img/icon/PY.png" alt="Omar Pembe portfolio visual">
                     </div>
                     <div class="fun-fact">
                         <div class="counter">
@@ -466,7 +396,7 @@ $projects = [
                  <!-- Single item -->
                 <div class="funfact-style-two-item wow fadeInUp" data-wow-delay="300ms">
                     <div class="icon">
-                        <img src="assets/img/icon/SQL.png" alt="Image Not Found">
+                        <img src="assets/img/icon/SQL.png" alt="Omar Pembe portfolio visual">
                     </div>
                     <div class="fun-fact">
                         <div class="counter">
@@ -480,7 +410,7 @@ $projects = [
                  <!-- Single item -->
                 <div class="funfact-style-two-item wow fadeInUp" data-wow-delay="400ms">
                     <div class="icon">
-                        <img src="assets/img/icon/photoshop.png" alt="Image Not Found">
+                        <img src="assets/img/icon/photoshop.png" alt="Omar Pembe portfolio visual">
                     </div>
                     <div class="fun-fact">
                         <div class="counter">
@@ -494,7 +424,7 @@ $projects = [
                  <!-- Single item -->
                 <div class="funfact-style-two-item wow fadeInUp" data-wow-delay="500ms">
                     <div class="icon">
-                        <img src="assets/img/icon/DG.png" alt="Image Not Found">
+                        <img src="assets/img/icon/DG.png" alt="Omar Pembe portfolio visual">
                     </div>
                     <div class="fun-fact">
                         <div class="counter">
@@ -684,13 +614,13 @@ $projects = [
             <div class="row">
                 <div class="col-lg-6">
                     <div class="thumb-style-one">
-                        <img src="assets/img/shape/wasap.png" alt="Image Not Found">
+                        <img src="assets/img/shape/wasap.png" alt="Omar Pembe portfolio visual">
                         <div class="chat-card">
                         
 
 
                             <a href="http://wa.me/255620272880" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i></a>
-                            <img src="assets/img/shape/12.png" alt="Image Not Found">
+                            <img src="assets/img/shape/12.png" alt="Omar Pembe portfolio visual">
                         </div>
                     </div>
                 </div>
@@ -766,7 +696,8 @@ if(isset($success)) {
 
                 <div class="row">
                     <div class="col-lg-6">
-                        <form action="assets/mail/contact.php" method="POST" class="contact-form contact-form">
+                        <form action="assets/mail/contact.php" method="POST" class="contact-form">
+                            <div class="contact-honeypot" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
@@ -812,7 +743,7 @@ if(isset($success)) {
                 </div>
 
                 <div class="contact-illustration">
-                    <img src="assets/img/illustration/omy.png" alt="Image Not Found">
+                    <img src="assets/img/illustration/omy.png" alt="Omar Pembe portfolio visual">
                     
                 </div>
 
@@ -882,6 +813,12 @@ if(isset($success)) {
     <script src="assets/js/jquery.lettering.min.js"></script>
     <script src="assets/js/jquery.circleType.js"></script>
     <script src="assets/js/typed.js"></script>
+    <script src="assets/js/features/ui.js"></script>
+    <script src="assets/js/features/portfolio.js"></script>
+    <script src="assets/js/features/counters.js"></script>
+    <script src="assets/js/features/carousels.js"></script>
+    <script src="assets/js/features/animations.js"></script>
+    <script src="assets/js/features/contact.js"></script>
     <script src="assets/js/main.js"></script>
 
 </body>
