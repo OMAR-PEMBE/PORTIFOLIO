@@ -2,5 +2,9 @@
 build/
 build.log
 .env
+data/projects.json
+data/site-content.json
+assets/uploads/projects/*
+!assets/uploads/projects/.gitkeep
 node_modules/
 dist/

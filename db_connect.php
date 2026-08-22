@@ -1,14 +1,14 @@
 <?php
-$host = "localhost";      // Server name
-$user = "root";           // Default user for XAMPP
-$password = "";           // Default password is empty
-$database = "portfolio_db";  // Your database name
+declare(strict_types=1);
 
-// Create connection
-$conn = mysqli_connect($host, $user, $password, $database);
+require_once __DIR__ . '/includes/config.php';
 
-// Check connection
-if (!$conn) {
-    die("Connection failed: " . mysqli_connect_error());
-}
-?>
+mysqli_report(MYSQLI_REPORT_ERROR | MYSQLI_REPORT_STRICT);
+
+$conn = new mysqli(
+    requiredEnvironment('DB_HOST'),
+    requiredEnvironment('DB_USER'),
+    environment('DB_PASSWORD', '') ?? '',
+    requiredEnvironment('DB_NAME')
+);
+$conn->set_charset('utf8mb4');

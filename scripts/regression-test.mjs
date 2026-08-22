@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 const php = process.env.PHP_BINARY || 'C:\\xampp\\php\\php.exe';
-const phpFiles = ['index.php', 'projects.php', 'project-details.php', '404.php', 'data/projects.php', 'includes/render-project-card.php', 'assets/mail/contact.php', 'assets/mail/ResendMailer.php'];
+const phpFiles = ['index.php', 'projects.php', 'project-details.php', '404.php', 'admin/index.php', 'admin/dashboard.php', 'data/projects.php', 'data/site-content.php', 'includes/config.php', 'includes/Project.php', 'includes/project-store.php', 'includes/project-repository.php', 'includes/site-content-store.php', 'includes/render-project-card.php', 'includes/RateLimiter.php', 'includes/ContactQueue.php', 'scripts/process-contact-queue.php', 'assets/mail/contact.php', 'assets/mail/ResendMailer.php'];
 
 for (const file of phpFiles) {
   const lint = spawnSync(php, ['-l', file], { cwd: root, encoding: 'utf8' });
@@ -17,8 +17,11 @@ const slugs = [...dataSource.matchAll(/^\s{4}'([^']+)'\s*=>\s*\[/gm)].map((match
 assert.equal(slugs.length, 6, 'expected six distinct project records');
 assert.equal(new Set(slugs).size, slugs.length, 'project slugs must be unique');
 
-const sources = await Promise.all(['index.php', 'projects.php', 'project-details.php', '404.php'].map((file) => readFile(path.join(root, file), 'utf8')));
+const sources = await Promise.all(['index.php', 'projects.php', 'project-details.php', '404.php', 'includes/page-scripts.php'].map((file) => readFile(path.join(root, file), 'utf8')));
 const markup = sources.join('\n');
+const themeScript = await readFile(path.join(root, 'assets/js/features/theme.js'), 'utf8');
+assert.match(themeScript, /localStorage/);
+assert.match(themeScript, /classList\.toggle\('bg-dark'/);
 assert.doesNotMatch(markup, /Info@yourdomain\.com|\bmail\s*\(|Main Project - Title|themeforest\.validthemes|Image Not Found/i);
 assert.doesNotMatch(markup, /href=["']#["']|services-details\.(?:php|html)|service\.html|projects\.html|resume\.html|pricing\.html|contact\.html|blog-with-sidebar\.html/i);
 
@@ -32,7 +35,13 @@ assert.match(handler, /configuredEmail\('CONTACT_RECIPIENT'\)/);
 assert.match(handler, /consumeRateLimit/);
 assert.doesNotMatch(handler, /\bmail\s*\(/);
 
-for (const match of markup.matchAll(/(?:src|href)=["'](assets\/[^"'?#]+)["']/g)) {
+const dashboard = await readFile(path.join(root, 'admin/dashboard.php'), 'utf8');
+assert.match(dashboard, /multipart\/form-data/);
+assert.match(dashboard, /name="gallery_files\[\]"/);
+assert.match(dashboard, /name="gallery_websites"/);
+assert.doesNotMatch(dashboard, /name="gallery" required/);
+
+for (const match of markup.matchAll(/(?:src|href|['"])(assets\/[^"'?#]+)["']/g)) {
   await access(path.join(root, match[1]));
 }
 

@@ -3,6 +3,9 @@
 declare(strict_types=1);
 
 require_once __DIR__ . '/ResendMailer.php';
+require_once __DIR__ . '/../../includes/config.php';
+require_once __DIR__ . '/../../includes/RateLimiter.php';
+require_once __DIR__ . '/../../includes/ContactQueue.php';
 
 function respond(string $message, int $status = 200): void
 {
@@ -29,33 +32,8 @@ function withinLength(string $value, int $maximum): bool
 
 function consumeRateLimit(string $clientAddress, int $maximum = 5, int $windowSeconds = 900): int
 {
-    $file = sys_get_temp_dir() . DIRECTORY_SEPARATOR . 'portfolio-contact-' . hash('sha256', $clientAddress) . '.json';
-    $handle = @fopen($file, 'c+');
-    if ($handle === false || !flock($handle, LOCK_EX)) {
-        if (is_resource($handle)) {
-            fclose($handle);
-        }
-        return -1;
-    }
-
-    $contents = stream_get_contents($handle);
-    $timestamps = is_string($contents) && $contents !== '' ? json_decode($contents, true) : [];
-    if (!is_array($timestamps)) {
-        $timestamps = [];
-    }
-    $cutoff = time() - $windowSeconds;
-    $timestamps = array_values(array_filter($timestamps, static fn ($value): bool => is_int($value) && $value >= $cutoff));
-    $allowed = count($timestamps) < $maximum;
-    if ($allowed) {
-        $timestamps[] = time();
-        ftruncate($handle, 0);
-        rewind($handle);
-        fwrite($handle, (string) json_encode($timestamps));
-        fflush($handle);
-    }
-    flock($handle, LOCK_UN);
-    fclose($handle);
-    return $allowed ? 1 : 0;
+    $redisDsn = environment('REDIS_DSN');
+    return (new RateLimiter(sys_get_temp_dir(), $redisDsn))->consume($clientAddress, $maximum, $windowSeconds);
 }
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') !== 'POST') {
@@ -115,6 +93,15 @@ $message = [
     'subject' => 'Portfolio contact from ' . $name,
     'text' => "Name: {$name}\nEmail: {$email}\nPhone: {$phone}\n\n{$comments}",
 ];
+
+$queueDirectory = environment('CONTACT_QUEUE_DIR');
+if ($queueDirectory !== null) {
+    if (!(new ContactQueue($queueDirectory))->enqueue($message, $requestId)) {
+        error_log((string) json_encode(['event' => 'contact.queue_error', 'request_id' => $requestId]));
+        respond('<div class="alert alert-error">Unable to submit your message right now. Please try again later.</div>', 503);
+    }
+    respond('<div class="alert alert-success"><h3>Email Sent Successfully.</h3><p>Thank you. Your message has been submitted.</p></div>');
+}
 
 $delivery = (new ResendMailer($apiKey))->send($message, $requestId);
 if (!$delivery->successful) {

@@ -1,6 +1,9 @@
 <?php
 declare(strict_types=1);
-$projects = require __DIR__ . '/data/projects.php';
+require_once __DIR__ . '/includes/project-repository.php';
+require_once __DIR__ . '/includes/site-content-store.php';
+$projects = allProjects();
+$content = siteContent();
 ?>
 
 
@@ -29,8 +32,8 @@ $projects = require __DIR__ . '/data/projects.php';
     <link href="assets/css/validnavs.css" rel="stylesheet">
     <link href="assets/css/helper.css" rel="stylesheet">
     <link href="assets/css/unit-test.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <link href="assets/css/style.css?v=20260822" rel="stylesheet">
+    <link href="style.css?v=20260822" rel="stylesheet">
     <!-- ========== End Stylesheet ========== -->
 
     <!--[if lte IE 9]>
@@ -123,6 +126,9 @@ $projects = require __DIR__ . '/data/projects.php';
                 </div><!-- /.navbar-collapse -->
 
                 <div class="nav-right">
+                    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
+                        <i class="fas fa-moon" aria-hidden="true"></i><span>Dark mode</span>
+                    </button>
                     <div class="attr-right">
                         <!-- Start Atribute Navigation -->
                         <div class="attr-nav attr-box">
@@ -153,7 +159,7 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-lg-12">
                     <div class="banner-style-one-items">
                         <div class="info">
-                            <h1>Hey <img src="assets/img/icon/hand.png" alt="Icon"> I'm Omar </h1>
+                            <h1><?= escapeHtml($content['hero_title'] ?? "Hey I'm Omar") ?> <img src="assets/img/icon/hand.png" alt="Icon"></h1>
                             <h2>
                                 <span class="header-caption" id="page-top">
                                     <!-- type headline start-->
@@ -169,9 +175,7 @@ $projects = require __DIR__ . '/data/projects.php';
                                     <!-- type headline end -->
                                 </span>
                             </h2>
-                            <p>
-                                Hi, I’m Omar Pembe, a Web Developer, Graphics Designer,UI/UX Designer and Social Media Manager with 5 years of experience. I create modern websites, engaging visuals, seamless user experiences, and effective social media strategies that help businesses and individuals stand out.
-                            </p>
+                            <p><?= escapeHtml($content['hero_description'] ?? '') ?></p>
                             <div class="flex-social mt-40">
                                 <div class="button">
                                     <a class="btn-style-regular" href="#contact"><span>Hire Me Now</span> <i class="fas fa-arrow-right"></i></a>
@@ -228,9 +232,7 @@ $projects = require __DIR__ . '/data/projects.php';
                 </div>
                 <div class="col-lg-7 pl-80 pl-md-15 pl-xs-15">
                     <div class="about-style-one-info">
-                        <p class="split-text">
-                            As a versatile digital creative with 5 years of experience, I specialize in web development, graphics design, social media management, and UI/UX design. I create responsive, user-friendly websites with modern designs, craft impactful visuals, manage engaging online strategies, and design seamless user experiences. My passion is transforming ideas into functional, visually appealing, and results-driven digital solutions.
-                        </p>
+                        <p class="split-text"><?= escapeHtml($content['about_text'] ?? '') ?></p>
                         <a class="btn-style-regular btn-border" href="#services"><span>Learn More</span> <i class="fas fa-arrow-right"></i></a>
                     </div>
                 </div>
@@ -245,7 +247,7 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-lg-8 offset-lg-2">
                     <div class="site-heading text-center">
                         <h4 class="sub-title">Specialization</h4>
-                        <h2 class="title split-text">Areas of Specialization</h2>
+                        <h2 class="title split-text"><?= escapeHtml($content['services_title'] ?? '') ?></h2>
                     </div>
                 </div>
             </div>
@@ -256,10 +258,8 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-xl-3 col-md-6 mb-30 wow fadeInUp">
                     <div class="service-style-one-item">
                         <img src="assets/img/icon/1.png" alt="Omar Pembe portfolio visual">
-                        <h4><a href="#contact">Web Development</a></h4>
-                        <p>
-                            I design and develop responsive, fast, and user-friendly websites that combine modern design with efficient functionality. From business websites to personal portfolios, I create solutions that help you stand out online.
-                        </p>
+                        <h4><a href="#contact"><?= escapeHtml($content['service_1_title'] ?? '') ?></a></h4>
+                        <p><?= escapeHtml($content['service_1_text'] ?? '') ?></p>
                     </div>
                 </div>
                 <!-- End Single Item -->
@@ -267,10 +267,8 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-xl-3 col-md-6 mb-30 active wow fadeInUp" data-wow-delay="200ms">
                     <div class="service-style-one-item active">
                         <img src="assets/img/icon/2.png" alt="Omar Pembe portfolio visual">
-                        <h4><a href="#contact">UI/UX Design</a></h4>
-                        <p>
-                            I design seamless user experiences with a focus on usability and aesthetics. My goal is to make digital products that not only look great but also provide smooth navigation and functionality.
-                        </p>
+                        <h4><a href="#contact"><?= escapeHtml($content['service_2_title'] ?? '') ?></a></h4>
+                        <p><?= escapeHtml($content['service_2_text'] ?? '') ?></p>
                     </div>
                 </div>
                 <!-- End Single Item -->
@@ -278,10 +276,8 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-xl-3 col-md-6 mb-30 wow fadeInUp" data-wow-delay="400ms">
                     <div class="service-style-one-item">
                         <img src="assets/img/icon/3.png" alt="Omar Pembe portfolio visual">
-                        <h4><a href="#contact">Graphics Design</a></h4>
-                        <p>
-                            I create professional and eye-catching visuals including logos, posters, social media creatives, and branding materials that effectively communicate your message and identity.
-                        </p>
+                        <h4><a href="#contact"><?= escapeHtml($content['service_3_title'] ?? '') ?></a></h4>
+                        <p><?= escapeHtml($content['service_3_text'] ?? '') ?></p>
                     </div>
                 </div>
                 <!-- End Single Item -->
@@ -289,10 +285,8 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-xl-3 col-md-6 mb-30 wow fadeInUp" data-wow-delay="600ms">
                     <div class="service-style-one-item">
                         <img src="assets/img/icon/4.png" alt="Omar Pembe portfolio visual">
-                        <h4><a href="#contact">Social Media Management</a></h4>
-                        <p>
-                            I help businesses and individuals grow their audience by managing social media accounts, creating content strategies, and running impactful campaigns that boost visibility and interaction.
-                        </p>
+                        <h4><a href="#contact"><?= escapeHtml($content['service_4_title'] ?? '') ?></a></h4>
+                        <p><?= escapeHtml($content['service_4_text'] ?? '') ?></p>
                     </div>
                 </div>
                 <!-- End Single Item -->
@@ -308,7 +302,7 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-lg-8 offset-lg-2">
                     <div class="site-heading text-center">
                         <h4 class="sub-title">Portfolio</h4>
-                        <h2 class="title split-text">My Projects</h2>
+                        <h2 class="title split-text"><?= escapeHtml($content['portfolio_title'] ?? '') ?></h2>
                     </div>
                 </div>
             </div>
@@ -447,7 +441,7 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="row guttex-xl">
 
                     <div class="col-lg-6">
-                        <h2>My Experience</h2>
+                        <h2><?= escapeHtml($content['experience_title'] ?? '') ?></h2>
                         <div class="time-style-one-items">
                             <!-- Single Item -->
                             <div class="timeline-style-one-item wow fadeInUp">
@@ -513,7 +507,7 @@ $projects = require __DIR__ . '/data/projects.php';
                     </div>
     
                     <div class="col-lg-6">
-                        <h2>Education Background</h2>
+                        <h2><?= escapeHtml($content['education_title'] ?? '') ?></h2>
                         <div class="time-style-one-items">
                             
                             <!-- Single Item -->
@@ -627,7 +621,7 @@ $projects = require __DIR__ . '/data/projects.php';
                 <div class="col-lg-5 offset-lg-1">
                     <div class="faq-style-one-items">
                         <h4 class="sub-title">Faq</h4>
-                        <h2>Frequently Asked Questions</h2>
+                        <h2><?= escapeHtml($content['faq_title'] ?? '') ?></h2>
                         <div class="accordion mt-30" id="faqAccordion">
                             <div class="accordion-item accordion-style-one">
                                 <h2 class="accordion-header" id="headingOne">
@@ -697,7 +691,6 @@ if(isset($success)) {
                 <div class="row">
                     <div class="col-lg-6">
                         <form action="assets/mail/contact.php" method="POST" class="contact-form">
-                            <div class="contact-honeypot" aria-hidden="true"><label for="website">Website</label><input id="website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
                             <div class="row">
                                 <div class="col-lg-12">
                                     <div class="form-group">
@@ -758,7 +751,7 @@ if(isset($success)) {
             <div class="row">
                 <div class="col-xl-8 offset-xl-2">
                     <div class="promo-box-items text-center">
-                        <h2>Hello👋i'm open for freelance work and collaborations</h2>
+                        <h2><?= escapeHtml($content['promo_title'] ?? '') ?></h2>
                         <h4>For quick response: <a href="http://wa.me/255620272880" target="_blank" rel="noopener noreferrer"><i class="fab fa-whatsapp"></i> Chat now</a></h4>
                         <div class="button mt-40">
                             <a class="btn-style-regular" href="#contact"><span>Hire Me Now </span> <i class="fas fa-arrow-right"></i></a>
@@ -783,7 +776,7 @@ if(isset($success)) {
                             <li><a class="smooth-menu" href="#portfolio">Portfolio</a></li>
                             <li><a class="smooth-menu" href="#contact">Contact</a></li>
                         </ul>
-                        <p>Copyright &copy; 2025 Omar Suleiman Pembe. All Rights Reserved</p>
+                        <p><?= escapeHtml($content['footer_text'] ?? '') ?></p>
                     </div>
                 </div>
             </div>
@@ -793,33 +786,7 @@ if(isset($success)) {
     
     <!-- jQuery Frameworks
     ============================================= -->
-    <script src="assets/js/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/jquery.appear.js"></script>
-    <script src="assets/js/jquery.easing.min.js"></script>
-    <script src="assets/js/swiper-bundle.min.js"></script>
-    <script src="assets/js/progress-bar.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/isotope.pkgd.min.js"></script>
-    <script src="assets/js/imagesloaded.pkgd.min.js"></script>
-    <script src="assets/js/magnific-popup.min.js"></script>
-    <script src="assets/js/jquery.waypoints.js"></script>
-    <script src="assets/js/count-to.js"></script>
-    <script src="assets/js/YTPlayer.min.js"></script>
-    <script src="assets/js/validnavs.js"></script>
-    <script src="assets/js/gsap.js"></script>
-    <script src="assets/js/ScrollTrigger.min.js"></script>
-    <script src="assets/js/SplitText.min.js"></script>
-    <script src="assets/js/jquery.lettering.min.js"></script>
-    <script src="assets/js/jquery.circleType.js"></script>
-    <script src="assets/js/typed.js"></script>
-    <script src="assets/js/features/ui.js"></script>
-    <script src="assets/js/features/portfolio.js"></script>
-    <script src="assets/js/features/counters.js"></script>
-    <script src="assets/js/features/carousels.js"></script>
-    <script src="assets/js/features/animations.js"></script>
-    <script src="assets/js/features/contact.js"></script>
-    <script src="assets/js/main.js"></script>
+    <?php require_once __DIR__ . '/includes/page-scripts.php'; renderPageScripts(true, true); ?>
 
 </body>
 </html>

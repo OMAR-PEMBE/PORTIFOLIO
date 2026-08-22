@@ -1,11 +1,15 @@
 <?php
 declare(strict_types=1);
-$projects = require __DIR__ . '/data/projects.php';
+require_once __DIR__ . '/includes/project-repository.php';
+$projects = allProjects();
 $requestedSlug = isset($_GET['project']) ? (string) $_GET['project'] : '';
 if (!isset($projects[$requestedSlug])) {
     $requestedSlug = (string) array_key_first($projects);
 }
-$project = $projects[$requestedSlug];
+$project = findProject($requestedSlug);
+if ($project === null) {
+    throw new RuntimeException('At least one project must be configured.');
+}
 $slugs = array_keys($projects);
 $position = array_search($requestedSlug, $slugs, true);
 $previousSlug = $slugs[($position - 1 + count($slugs)) % count($slugs)];
@@ -24,7 +28,7 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
 
     <!-- ========== Page Title ========== -->
       <!-- ========== Page Title ========== -->
-    <title><?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?> | Omar S Pembe</title>
+    <title><?= escapeHtml($project->title) ?> | Omar S Pembe</title>
 
     <!-- ========== Favicon Icon ========== -->
     <link rel="shortcut icon" href="assets/img/icon/logo2.png" type="image/x-icon">
@@ -38,8 +42,8 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
     <link href="assets/css/validnavs.css" rel="stylesheet">
     <link href="assets/css/helper.css" rel="stylesheet">
     <link href="assets/css/unit-test.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <link href="assets/css/style.css?v=20260822" rel="stylesheet">
+    <link href="style.css?v=20260822" rel="stylesheet">
     <!-- ========== End Stylesheet ========== -->
 
     <!--[if lte IE 9]>
@@ -112,6 +116,9 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
                 </div><!-- /.navbar-collapse -->
 
                 <div class="nav-right">
+                    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
+                        <i class="fas fa-moon" aria-hidden="true"></i><span>Dark mode</span>
+                    </button>
                     <div class="attr-right">
                         <!-- Start Atribute Navigation -->
                         <div class="attr-nav attr-box">
@@ -140,7 +147,7 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
         <div class="container">
             <div class="row">
                 <div class="col-xl-6 offset-xl-3 col-lg-8 offset-lg-2">
-                    <h1><?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?></h1>
+                    <h1><?= escapeHtml($project->title) ?></h1>
                     <nav aria-label="breadcrumb">
                         <ol class="breadcrumb">
                             <li><a href="projects.php"><i class="fas fa-home"></i> Home</a></li>
@@ -163,35 +170,45 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
                     <div class="col-xl-4 col-lg-5 left-info mb-xs-40 mb-md-50">
                         <div class="project-single-info">
                             <ul>
-                                <li>Client <span><?= htmlspecialchars((string) $project['client'], ENT_QUOTES, 'UTF-8') ?></span></li>
-                                <li>Date <span><?= htmlspecialchars((string) $project['date'], ENT_QUOTES, 'UTF-8') ?></span></li>
-                                <li>Service <span><?= htmlspecialchars((string) $project['service'], ENT_QUOTES, 'UTF-8') ?></span></li>
-                                <li>Location <span><?= htmlspecialchars((string) $project['location'], ENT_QUOTES, 'UTF-8') ?></span></li>
+                                <li>Client <span><?= escapeHtml($project->client) ?></span></li>
+                                <li>Date <span><?= escapeHtml($project->date) ?></span></li>
+                                <li>Service <span><?= escapeHtml($project->service) ?></span></li>
+                                <li>Location <span><?= escapeHtml($project->location) ?></span></li>
                             </ul>
                         </div>
                     </div>
                     <div class="right-info col-xl-8 col-lg-7 pl-50 pl-md-15 pl-xs-15 mt-md-10">
                         <h2>Background</h2>
-                        <p><?= htmlspecialchars((string) $project['background'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <p><?= escapeHtml($project->background) ?></p>
                         <h2>Challenges</h2>
-                        <p><?= htmlspecialchars((string) $project['challenges'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <p><?= escapeHtml($project->challenges) ?></p>
                         <h2>Solution</h2>
-                        <p><?= htmlspecialchars((string) $project['solution'], ENT_QUOTES, 'UTF-8') ?></p>
+                        <p><?= escapeHtml($project->solution) ?></p>
                     </div>
                 </div>
             </div>
         </div>
     </div>
         
-   <div class="container">
+    <div class="container">
             <div class="row">
                 <div class="col-md-12 gallery-content">
                     <div class="magnific-mix-gallery gallery-masonary">
                         <div id="gallery-masonary" class="gallery-items colums-3">
-                            <?php foreach ($project['gallery'] as $image): ?>
+                            <?php foreach ($project->gallery as $galleryItem): ?>
+                            <?php
+                            $galleryType = is_array($galleryItem) ? $galleryItem['type'] : 'image';
+                            $galleryUrl = is_array($galleryItem) ? $galleryItem['url'] : $galleryItem;
+                            ?>
                             <div class="gallery-item">
                                 <div class="gallery-style-one">
-                                    <img src="<?= htmlspecialchars((string) $image, ENT_QUOTES, 'UTF-8') ?>" alt="<?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?> project image" class="project-media" loading="lazy" decoding="async">
+                                    <?php if ($galleryType === 'video'): ?>
+                                        <video class="project-media" controls preload="metadata"><source src="<?= escapeHtml($galleryUrl) ?>" type="video/mp4"></video>
+                                    <?php elseif ($galleryType === 'website'): ?>
+                                        <a class="project-website-link" href="<?= escapeHtml($galleryUrl) ?>" target="_blank" rel="noopener noreferrer"><i class="fas fa-external-link-alt"></i> Open project website</a>
+                                    <?php else: ?>
+                                        <img src="<?= escapeHtml($galleryUrl) ?>" alt="<?= escapeHtml($project->title) ?> project image" class="project-media" loading="lazy" decoding="async">
+                                    <?php endif; ?>
                                 </div>
                             </div>
                             <?php endforeach; ?>
@@ -247,29 +264,7 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
     
     <!-- jQuery Frameworks
     ============================================= -->
-    <script src="assets/js/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/jquery.appear.js"></script>
-    <script src="assets/js/jquery.easing.min.js"></script>
-    <script src="assets/js/swiper-bundle.min.js"></script>
-    <script src="assets/js/progress-bar.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/isotope.pkgd.min.js"></script>
-    <script src="assets/js/imagesloaded.pkgd.min.js"></script>
-    <script src="assets/js/magnific-popup.min.js"></script>
-    <script src="assets/js/jquery.waypoints.js"></script>
-    <script src="assets/js/count-to.js"></script>
-    <script src="assets/js/YTPlayer.min.js"></script>
-    <script src="assets/js/validnavs.js"></script>
-    <script src="assets/js/gsap.js"></script>
-    <script src="assets/js/ScrollTrigger.min.js"></script>
-    <script src="assets/js/jquery.lettering.min.js"></script>
-    <script src="assets/js/jquery.circleType.js"></script>
-    <script src="assets/js/typed.js"></script>
-    <script src="assets/js/features/ui.js"></script>
-    <script src="assets/js/features/portfolio.js"></script>
-    <script src="assets/js/features/animations.js"></script>
-    <script src="assets/js/main.js"></script>
+    <?php require_once __DIR__ . '/includes/page-scripts.php'; renderPageScripts(false, true); ?>
 
 </body>
 </html>

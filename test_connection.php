@@ -1,4 +1,4 @@
 <?php
-include 'db_connect.php';
-echo "✅ Database connection successful!";
+require __DIR__ . '/db_connect.php';
+echo 'Database connection successful!';
 ?>

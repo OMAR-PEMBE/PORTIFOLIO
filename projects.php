@@ -1,6 +1,7 @@
 <?php
 declare(strict_types=1);
-$projects = require __DIR__ . '/data/projects.php';
+require_once __DIR__ . '/includes/project-repository.php';
+$projects = allProjects();
 ?>
 
 <!DOCTYPE html>
@@ -28,8 +29,8 @@ $projects = require __DIR__ . '/data/projects.php';
     <link href="assets/css/validnavs.css" rel="stylesheet">
     <link href="assets/css/helper.css" rel="stylesheet">
     <link href="assets/css/unit-test.css" rel="stylesheet">
-    <link href="assets/css/style.css" rel="stylesheet">
-    <link href="style.css" rel="stylesheet">
+    <link href="assets/css/style.css?v=20260822" rel="stylesheet">
+    <link href="style.css?v=20260822" rel="stylesheet">
     <!-- ========== End Stylesheet ========== -->
 
     <!--[if lte IE 9]>
@@ -107,6 +108,9 @@ $projects = require __DIR__ . '/data/projects.php';
                 <!-- /.navbar-collapse -->
 
                 <div class="nav-right">
+                    <button type="button" id="theme-toggle" class="theme-toggle" aria-label="Switch to dark mode" aria-pressed="false">
+                        <i class="fas fa-moon" aria-hidden="true"></i><span>Dark mode</span>
+                    </button>
                     <div class="attr-right">
                         <!-- Start Atribute Navigation -->
                         <div class="attr-nav attr-box">
@@ -206,29 +210,7 @@ $projects = require __DIR__ . '/data/projects.php';
     
     <!-- jQuery Frameworks
     ============================================= -->
-    <script src="assets/js/jquery-3.6.0.min.js"></script>
-    <script src="assets/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/js/jquery.appear.js"></script>
-    <script src="assets/js/jquery.easing.min.js"></script>
-    <script src="assets/js/swiper-bundle.min.js"></script>
-    <script src="assets/js/progress-bar.min.js"></script>
-    <script src="assets/js/wow.min.js"></script>
-    <script src="assets/js/isotope.pkgd.min.js"></script>
-    <script src="assets/js/imagesloaded.pkgd.min.js"></script>
-    <script src="assets/js/magnific-popup.min.js"></script>
-    <script src="assets/js/jquery.waypoints.js"></script>
-    <script src="assets/js/count-to.js"></script>
-    <script src="assets/js/YTPlayer.min.js"></script>
-    <script src="assets/js/validnavs.js"></script>
-    <script src="assets/js/gsap.js"></script>
-    <script src="assets/js/ScrollTrigger.min.js"></script>
-    <script src="assets/js/jquery.lettering.min.js"></script>
-    <script src="assets/js/jquery.circleType.js"></script>
-    <script src="assets/js/typed.js"></script>
-    <script src="assets/js/features/ui.js"></script>
-    <script src="assets/js/features/portfolio.js"></script>
-    <script src="assets/js/features/animations.js"></script>
-    <script src="assets/js/main.js"></script>
+    <?php require_once __DIR__ . '/includes/page-scripts.php'; renderPageScripts(false, true); ?>
 
 </body>
 </html>

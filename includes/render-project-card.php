@@ -1,27 +1,29 @@
 <?php
 declare(strict_types=1);
 
+require_once __DIR__ . '/project-repository.php';
+
 /** @var string $slug */
-/** @var array<string, mixed> $project */
-$detailUrl = 'project-details.php?project=' . rawurlencode($slug);
+/** @var Project $project */
+$detailUrl = projectUrl($slug);
 ?>
 <div class="gallery-item">
     <div class="gallery-style-one">
-        <?php if (($project['type'] ?? 'image') === 'video'): ?>
+        <?php if ($project->type === 'video'): ?>
             <video controls preload="metadata" class="project-media">
-                <source src="<?= htmlspecialchars((string) $project['file'], ENT_QUOTES, 'UTF-8') ?>" type="video/mp4">
+            <source src="<?= escapeHtml($project->file) ?>" type="video/mp4">
                 Your browser does not support the video tag.
             </video>
         <?php else: ?>
-            <a href="<?= htmlspecialchars($detailUrl, ENT_QUOTES, 'UTF-8') ?>">
-                <img src="<?= htmlspecialchars((string) $project['file'], ENT_QUOTES, 'UTF-8') ?>"
-                     alt="<?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?> project preview"
+            <a href="<?= escapeHtml($detailUrl) ?>">
+                 <img src="<?= escapeHtml($project->file) ?>"
+                     alt="<?= escapeHtml($project->title) ?> project preview"
                      class="project-media" loading="lazy" decoding="async">
             </a>
         <?php endif; ?>
         <div class="info">
             <div class="overlay"><div class="content"></div></div>
-            <h4><a href="<?= htmlspecialchars($detailUrl, ENT_QUOTES, 'UTF-8') ?>"><?= htmlspecialchars((string) $project['title'], ENT_QUOTES, 'UTF-8') ?></a></h4>
+            <h4><a href="<?= escapeHtml($detailUrl) ?>"><?= escapeHtml($project->title) ?></a></h4>
         </div>
     </div>
 </div>

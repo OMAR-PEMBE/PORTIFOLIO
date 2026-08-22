@@ -7,19 +7,15 @@
         if (!$) { return; }
 
         var $gallery = $('#gallery-masonary');
-        var $masonry = $gallery.add('.blog-masonry');
-        if ($masonry.length && $.fn.imagesLoaded && $.fn.isotope) {
-            $masonry.imagesLoaded(function () {
-                if ($gallery.length) {
-                    $gallery.isotope({ itemSelector: '.gallery-item', percentPosition: true, masonry: { columnWidth: '.gallery-item' } });
-                }
+        if ($.fn.imagesLoaded && $.fn.isotope && $('.blog-masonry').length) {
+            $('.blog-masonry').imagesLoaded(function () {
                 $('.blog-masonry').isotope({ itemSelector: '.blog-item', percentPosition: true, masonry: { columnWidth: '.blog-item' } });
             });
 
             $('.mix-item-menu').on('click', 'button', function (event) {
                 event.preventDefault();
                 $(this).addClass('active').siblings().removeClass('active');
-                if ($gallery.length) { $gallery.isotope({ filter: $(this).attr('data-filter') }); }
+                $('.blog-masonry').isotope({ filter: $(this).attr('data-filter') });
             });
         }
 
