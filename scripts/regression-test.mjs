@@ -4,8 +4,8 @@ import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
-const php = process.env.PHP_BINARY || 'C:\\xampp\\php\\php.exe';
-const phpFiles = ['index.php', 'projects.php', 'project-details.php', '404.php', 'admin/index.php', 'admin/dashboard.php', 'data/projects.php', 'data/site-content.php', 'includes/config.php', 'includes/Project.php', 'includes/project-store.php', 'includes/project-repository.php', 'includes/site-content-store.php', 'includes/render-project-card.php', 'includes/RateLimiter.php', 'includes/ContactQueue.php', 'scripts/process-contact-queue.php', 'assets/mail/contact.php', 'assets/mail/ResendMailer.php'];
+const php = process.env.PHP_BINARY || (process.platform === 'win32' ? 'C:\\xampp\\php\\php.exe' : 'php');
+const phpFiles = ['index.php', 'projects.php', 'project-details.php', '404.php', 'admin/index.php', 'admin/dashboard.php', 'data/projects.php', 'data/site-content.php', 'includes/config.php', 'includes/admin-auth.php', 'includes/Project.php', 'includes/project-store.php', 'includes/project-repository.php', 'includes/site-content-store.php', 'includes/render-project-card.php', 'includes/RateLimiter.php', 'includes/ContactQueue.php', 'scripts/process-contact-queue.php', 'assets/mail/contact.php', 'assets/mail/ResendMailer.php'];
 
 for (const file of phpFiles) {
   const lint = spawnSync(php, ['-l', file], { cwd: root, encoding: 'utf8' });
@@ -26,6 +26,8 @@ assert.doesNotMatch(markup, /Info@yourdomain\.com|\bmail\s*\(|Main Project - Tit
 assert.doesNotMatch(markup, /href=["']#["']|services-details\.(?:php|html)|service\.html|projects\.html|resume\.html|pricing\.html|contact\.html|blog-with-sidebar\.html/i);
 
 const home = sources[0];
+assert.match(sources[3], /<title>Page Not Found \| Omar S Pembe<\/title>/);
+assert.match(sources[3], /name="robots" content="noindex,follow"/);
 for (const target of ['home', 'services', 'portfolio', 'resume', 'contact']) {
   assert.match(home, new RegExp(`id=["']${target}["']`), `missing #${target} navigation target`);
 }
@@ -36,10 +38,20 @@ assert.match(handler, /consumeRateLimit/);
 assert.doesNotMatch(handler, /\bmail\s*\(/);
 
 const dashboard = await readFile(path.join(root, 'admin/dashboard.php'), 'utf8');
+const login = await readFile(path.join(root, 'admin/index.php'), 'utf8');
 assert.match(dashboard, /multipart\/form-data/);
 assert.match(dashboard, /name="gallery_files\[\]"/);
 assert.match(dashboard, /name="gallery_websites"/);
 assert.doesNotMatch(dashboard, /name="gallery" required/);
+assert.match(dashboard, /name="original_slug"/);
+assert.match(dashboard, /name="action" value="logout"/);
+assert.doesNotMatch(dashboard, /\?logout=1/);
+assert.match(login, /recordFailedAdminLogin/);
+assert.match(login, /name="csrf"/);
+assert.match(sources[2], /http_response_code\(404\)/);
+
+await access(path.join(root, '.htaccess'));
+await access(path.join(root, 'assets/uploads/projects/.htaccess'));
 
 for (const match of markup.matchAll(/(?:src|href|['"])(assets\/[^"'?#]+)["']/g)) {
   await access(path.join(root, match[1]));

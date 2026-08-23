@@ -1,25 +1,24 @@
 <?php
 declare(strict_types=1);
 
-session_start();
+require_once __DIR__ . '/../includes/admin-auth.php';
+startAdminSession();
 require_once __DIR__ . '/../includes/config.php';
 require_once __DIR__ . '/../includes/Project.php';
 require_once __DIR__ . '/../includes/project-store.php';
 require_once __DIR__ . '/../includes/project-repository.php';
 require_once __DIR__ . '/../includes/site-content-store.php';
 
-if (isset($_GET['logout'])) {
-    $_SESSION = [];
-    session_destroy();
+requireAdmin();
+
+if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST' && ($_POST['action'] ?? '') === 'logout') {
+    if (!validAdminCsrf()) {
+        http_response_code(403);
+        exit('Invalid logout request.');
+    }
+    destroyAdminSession();
     header('Location: index.php');
     exit;
-}
-if (empty($_SESSION['admin_authenticated'])) {
-    header('Location: index.php');
-    exit;
-}
-if (!isset($_SESSION['admin_csrf'])) {
-    $_SESSION['admin_csrf'] = bin2hex(random_bytes(32));
 }
 
 function dashboardInput(string $name): string
@@ -50,7 +49,11 @@ function dashboardGalleryUploads(string $slug): array
     ];
     $uploaded = [];
     $count = is_array($files['name']) ? count($files['name']) : 0;
+    if ($count > 20) {
+        throw new InvalidArgumentException('Upload no more than 20 files at a time.');
+    }
     $finfo = new finfo(FILEINFO_MIME_TYPE);
+    try {
     for ($index = 0; $index < $count; $index++) {
         if (($files['error'][$index] ?? UPLOAD_ERR_NO_FILE) === UPLOAD_ERR_NO_FILE) {
             continue;
@@ -69,7 +72,32 @@ function dashboardGalleryUploads(string $slug): array
         }
         $uploaded[] = ['type' => $allowed[$mime]['type'], 'url' => 'assets/uploads/projects/' . $filename];
     }
+    } catch (Throwable $exception) {
+        deleteGalleryFiles($uploaded);
+        throw $exception;
+    }
     return $uploaded;
+}
+
+function localGalleryPath(mixed $item): ?string
+{
+    $url = is_array($item) ? (string) ($item['url'] ?? '') : (string) $item;
+    if (!preg_match('#^assets/uploads/projects/[a-z0-9-]+\.(?:jpe?g|png|webp|gif|mp4|webm|mov)$#i', $url)) {
+        return null;
+    }
+    $root = realpath(dirname(__DIR__) . '/assets/uploads/projects');
+    $path = realpath(dirname(__DIR__) . '/' . $url);
+    return $root !== false && $path !== false && str_starts_with($path, $root . DIRECTORY_SEPARATOR) ? $path : null;
+}
+
+function deleteGalleryFiles(array $items): void
+{
+    foreach ($items as $item) {
+        $path = localGalleryPath($item);
+        if ($path !== null && is_file($path) && !unlink($path)) {
+            error_log((string) json_encode(['event' => 'admin.media_delete_failed', 'path' => $path]));
+        }
+    }
 }
 
 function galleryItemType(mixed $item): string
@@ -113,12 +141,15 @@ $selectedSlug = (string) ($_GET['project'] ?? array_key_first($records) ?? '');
 $view = ($_GET['view'] ?? '') === 'site' ? 'site' : 'project';
 
 if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
+    $newUploads = [];
     try {
         if (!isset($_POST['csrf'], $_SESSION['admin_csrf']) || !hash_equals((string) $_SESSION['admin_csrf'], (string) $_POST['csrf'])) {
             throw new RuntimeException('The form expired. Please try again.');
         }
         $action = (string) ($_POST['action'] ?? '');
-        if ($action === 'site-content') {
+        if ($action === 'logout') {
+            throw new RuntimeException('Invalid logout request.');
+        } elseif ($action === 'site-content') {
             $content = siteContent();
             foreach (array_keys($content) as $key) {
                 $content[$key] = dashboardInput($key);
@@ -128,15 +159,25 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
             $message = 'Site content saved.';
         } else {
             $slug = dashboardInput('slug');
+            $originalSlug = dashboardInput('original_slug');
             if (!preg_match('/^[a-z0-9]+(?:-[a-z0-9]+)*$/', $slug)) {
                 throw new InvalidArgumentException('Use a lowercase slug with letters, numbers, and hyphens.');
             }
             if ($action === 'delete') {
+                $deletedGallery = is_array($records[$slug]['gallery'] ?? null) ? $records[$slug]['gallery'] : [];
                 unset($records[$slug]);
                 $store->save($records);
+                deleteGalleryFiles($deletedGallery);
                 $selectedSlug = (string) array_key_first($records);
                 $message = 'Project deleted.';
             } else {
+                if ($originalSlug !== '' && !isset($records[$originalSlug])) {
+                    throw new RuntimeException('The project being edited no longer exists. Refresh and try again.');
+                }
+                if ($slug !== $originalSlug && isset($records[$slug])) {
+                    throw new InvalidArgumentException('That project slug is already in use.');
+                }
+                $oldGallery = $originalSlug !== '' && is_array($records[$originalSlug]['gallery'] ?? null) ? $records[$originalSlug]['gallery'] : [];
                 $record = [
                     'title' => dashboardInput('title'), 'type' => dashboardInput('type'), 'file' => dashboardInput('file'),
                     'client' => dashboardInput('client'), 'service' => dashboardInput('service'), 'date' => dashboardInput('date'),
@@ -149,15 +190,26 @@ if (($_SERVER['REQUEST_METHOD'] ?? '') === 'POST') {
                         $record['gallery'][] = $item;
                     }
                 }
-                $record['gallery'] = array_merge($record['gallery'], dashboardGalleryUploads($slug), dashboardWebsiteLinks());
+                $newUploads = dashboardGalleryUploads($slug);
+                $record['gallery'] = array_merge($record['gallery'], $newUploads, dashboardWebsiteLinks());
                 Project::fromRecord($slug, $record);
+                if ($originalSlug !== '' && $originalSlug !== $slug) {
+                    unset($records[$originalSlug]);
+                }
                 $records[$slug] = $record;
                 $store->save($records);
+                $keptPaths = array_filter(array_map('localGalleryPath', $record['gallery']));
+                $removedItems = array_filter($oldGallery, static function (mixed $item) use ($keptPaths): bool {
+                    $path = localGalleryPath($item);
+                    return $path !== null && !in_array($path, $keptPaths, true);
+                });
+                deleteGalleryFiles($removedItems);
                 $selectedSlug = $slug;
                 $message = 'Project saved.';
             }
         }
     } catch (Throwable $exception) {
+        deleteGalleryFiles($newUploads);
         $error = $exception->getMessage();
     }
 }
@@ -186,7 +238,7 @@ $csrf = (string) $_SESSION['admin_csrf'];
                 <h1>Portfolio Admin</h1>
                 <p>Manage every part of your website from one workspace.</p>
             </div>
-            <a href="?logout=1">Sign out</a>
+            <form method="post" class="admin-logout-form"><input type="hidden" name="csrf" value="<?= escapeHtml($csrf) ?>"><button type="submit" name="action" value="logout">Sign out</button></form>
         </header>
 
         <?php if ($message !== null): ?><p class="admin-success admin-notice"><?= escapeHtml($message) ?></p><?php endif; ?>
@@ -219,6 +271,7 @@ $csrf = (string) $_SESSION['admin_csrf'];
                     <form class="admin-form" method="post" enctype="multipart/form-data">
                         <input type="hidden" name="csrf" value="<?= escapeHtml($csrf) ?>">
                         <input type="hidden" name="action" value="save">
+                        <input type="hidden" name="original_slug" value="<?= escapeHtml($selectedSlug === 'new' ? '' : $selectedSlug) ?>">
                         <label>Slug<input name="slug" value="<?= escapeHtml($selectedSlug === 'new' ? '' : $selectedSlug) ?>" required pattern="[a-z0-9]+(?:-[a-z0-9]+)*"></label>
                         <label>Title<input name="title" value="<?= escapeHtml($selected['title'] ?? '') ?>" required></label>
                         <label>Type<select name="type"><option value="image" <?= ($selected['type'] ?? 'image') === 'image' ? 'selected' : '' ?>>Image</option><option value="video" <?= ($selected['type'] ?? '') === 'video' ? 'selected' : '' ?>>Video</option></select></label>

@@ -20,6 +20,27 @@ final class RateLimiter
         return $this->consumeFile($clientAddress, $maximum, $windowSeconds);
     }
 
+    public function clear(string $clientAddress): void
+    {
+        if ($this->redisDsn !== null && class_exists('Redis')) {
+            $parts = parse_url($this->redisDsn);
+            if (is_array($parts) && isset($parts['host'])) {
+                try {
+                    $redis = new Redis();
+                    $redis->connect($parts['host'], (int) ($parts['port'] ?? 6379), 1.0);
+                    $redis->del('portfolio:contact:' . hash('sha256', $clientAddress));
+                    return;
+                } catch (Throwable) {
+                    // Fall through and clear any local limiter state as well.
+                }
+            }
+        }
+        $file = $this->directory . DIRECTORY_SEPARATOR . 'portfolio-contact-' . hash('sha256', $clientAddress) . '.json';
+        if (is_file($file)) {
+            @unlink($file);
+        }
+    }
+
     private function consumeRedis(string $clientAddress, int $maximum, int $windowSeconds): int
     {
         $parts = parse_url($this->redisDsn);

@@ -4,7 +4,9 @@ require_once __DIR__ . '/includes/project-repository.php';
 $projects = allProjects();
 $requestedSlug = isset($_GET['project']) ? (string) $_GET['project'] : '';
 if (!isset($projects[$requestedSlug])) {
-    $requestedSlug = (string) array_key_first($projects);
+    http_response_code(404);
+    require __DIR__ . '/404.php';
+    exit;
 }
 $project = findProject($requestedSlug);
 if ($project === null) {
@@ -98,7 +100,6 @@ $nextSlug = $slugs[($position + 1) % count($slugs)];
                     <ul class="nav navbar-nav navbar-right" data-in="fadeInDown" data-out="fadeOutUp">
                                 <li>
                             <a class="smooth-menu" href="index.php">Home</a>
-                        </li>
                         </li>
                         <li>
                             <a class="smooth-menu" href="index.php#services">What I Do</a>

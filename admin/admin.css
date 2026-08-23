@@ -183,6 +183,14 @@
     color: #fff;
 }
 
+.admin-logout-form {
+    margin: 0;
+}
+
+.admin-logout-form button {
+    width: auto;
+}
+
 .admin-workspace {
     display: grid;
     grid-template-columns: 280px minmax(0, 1fr);

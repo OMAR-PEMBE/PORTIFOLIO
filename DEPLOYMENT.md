@@ -38,8 +38,18 @@ The project editor is available at `/admin/`. Set `ADMIN_PASSWORD_HASH` to a PHP
 php -r "echo password_hash('choose-a-long-password', PASSWORD_DEFAULT), PHP_EOL;"
 ```
 
+Never deploy the hash from a shared example or reuse an account password. Admin sessions use strict, HTTP-only cookies, expire after two hours of inactivity, and failed login attempts are limited to five per IP/username pair every 15 minutes. If the site is behind a reverse proxy, restrict `/admin/` by IP or add a second authentication layer at the proxy where practical.
+
+Logout is a CSRF-protected POST action. Verify HTTPS is enabled before signing in so the session cookie is marked Secure.
+
 The admin stores changes atomically in `data/projects.json`, which is intentionally ignored by Git. Ensure the `data` directory is writable by the web server and back up this file in production.
 
 Homepage text and project content are managed together at `/admin/dashboard.php` after login and stored in `data/site-content.json` and `data/projects.json`. Project gallery lines accept legacy asset paths or typed direct URLs in the format `image | URL`, `video | URL`, or `website | URL`.
 
 Project media uploads accept JPG, PNG, WebP, GIF, MP4, WebM, and MOV files. Images are limited to 10 MiB each and videos to 100 MiB each. Configure PHP and Apache upload limits (`upload_max_filesize` and `post_max_size`) high enough for the video limit when needed.
+
+The included Apache `.htaccess` blocks access to internal directories and dotfiles, disables directory indexes, and adds baseline security headers. Confirm that the virtual host permits `AllowOverride` or copy these directives into the virtual-host configuration. Add `Strict-Transport-Security` at the HTTPS virtual host or reverse proxy only after HTTPS works across the whole domain.
+
+Keep `CONTACT_QUEUE_DIR`, backups, and logs outside the public document root. The `test_connection.php` diagnostic is intentionally not part of the application; do not recreate or deploy public connection-test endpoints. Configure PHP with `display_errors=Off` and forward `error_log` to private, monitored storage.
+
+Back up `data/projects.json`, `data/site-content.json`, and `assets/uploads/projects` together. Test restoration periodically so records and their uploaded media remain consistent.

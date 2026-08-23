@@ -81,7 +81,7 @@ $projects = allProjects();
                 <!-- Collect the nav links, forms, and other content for toggling -->
                 <div class="collapse navbar-collapse" id="navbar-menu">
 
-                    <img src="assets/img/" alt="Logo">
+                    <img src="assets/img/icon/logo2.png" alt="Omar Pembe logo">
                     <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navbar-menu">
                         <i class="fa fa-times"></i>
                     </button>

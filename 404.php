@@ -9,7 +9,9 @@
     <meta name="description" content="Antux - Personal Portfolio Template">
 
     <!-- ========== Page Title ========== -->
-    <title>Omar S Pembe - Personal Portfolio</title>
+    <meta name="description" content="The requested page could not be found.">
+    <meta name="robots" content="noindex,follow">
+    <title>Page Not Found | Omar S Pembe</title>
 
     <!-- ========== Favicon Icon ========== -->
     <link rel="shortcut icon" href="assets/img/favicon.png" type="image/x-icon">

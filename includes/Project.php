@@ -60,12 +60,24 @@ final class Project
             throw new InvalidArgumentException("Project '{$slug}' has an invalid gallery.");
         }
 
+        if (!is_string($record['type']) || !in_array($record['type'], ['image', 'video'], true)) {
+            throw new InvalidArgumentException("Project '{$slug}' has an invalid 'type'.");
+        }
+        if (!is_string($record['file']) || !self::validMediaUrl($record['file'])) {
+            throw new InvalidArgumentException("Project '{$slug}' has an invalid preview URL or path.");
+        }
+
         foreach ($record['gallery'] as $item) {
-            if (is_string($item) && trim($item) !== '') {
+            if (is_string($item) && self::validMediaUrl($item)) {
                 continue;
             }
             if (!is_array($item) || !is_string($item['type'] ?? null) || !is_string($item['url'] ?? null) || trim($item['url']) === '' || !in_array($item['type'], ['image', 'video', 'website'], true)) {
                 throw new InvalidArgumentException("Project '{$slug}' has an invalid gallery item.");
+            }
+            $url = $item['url'];
+            $valid = $item['type'] === 'website' ? self::validWebUrl($url) : self::validMediaUrl($url);
+            if (!$valid) {
+                throw new InvalidArgumentException("Project '{$slug}' has an unsafe gallery URL.");
             }
         }
 
@@ -91,5 +103,17 @@ final class Project
             $values['solution'],
             array_values($record['gallery'])
         );
+    }
+
+    private static function validWebUrl(string $url): bool
+    {
+        return filter_var($url, FILTER_VALIDATE_URL) !== false
+            && in_array(strtolower((string) parse_url($url, PHP_URL_SCHEME)), ['http', 'https'], true);
+    }
+
+    private static function validMediaUrl(string $url): bool
+    {
+        $url = trim($url);
+        return preg_match('#^assets/[A-Za-z0-9._/-]+$#', $url) === 1 || self::validWebUrl($url);
     }
 }
