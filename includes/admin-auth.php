@@ -12,11 +12,16 @@ function startAdminSession(): void
     ini_set('session.use_strict_mode', '1');
     ini_set('session.use_only_cookies', '1');
     session_name('portfolio_admin');
+    $scriptDirectory = str_replace('\\', '/', dirname((string) ($_SERVER['SCRIPT_NAME'] ?? '/admin/index.php')));
+    $cookiePath = rtrim($scriptDirectory, '/');
+    if ($cookiePath === '' || $cookiePath === '.') {
+        $cookiePath = '/admin';
+    }
     session_set_cookie_params([
         'httponly' => true,
         'secure' => isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off',
         'samesite' => 'Strict',
-        'path' => '/admin',
+        'path' => $cookiePath,
     ]);
     session_start();
 }

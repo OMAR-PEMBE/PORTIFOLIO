@@ -33,7 +33,8 @@ function dashboardGalleryUploads(string $slug): array
         return [];
     }
 
-    $directory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'projects';
+    $defaultDirectory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'projects';
+    $directory = environment('UPLOAD_STORAGE_DIR', $defaultDirectory) ?? $defaultDirectory;
     if (!is_dir($directory) && !mkdir($directory, 0755, true) && !is_dir($directory)) {
         throw new RuntimeException('Unable to create the project upload directory.');
     }
@@ -85,7 +86,8 @@ function localGalleryPath(mixed $item): ?string
     if (!preg_match('#^assets/uploads/projects/[a-z0-9-]+\.(?:jpe?g|png|webp|gif|mp4|webm|mov)$#i', $url)) {
         return null;
     }
-    $root = realpath(dirname(__DIR__) . '/assets/uploads/projects');
+    $defaultDirectory = dirname(__DIR__) . DIRECTORY_SEPARATOR . 'assets' . DIRECTORY_SEPARATOR . 'uploads' . DIRECTORY_SEPARATOR . 'projects';
+    $root = realpath(environment('UPLOAD_STORAGE_DIR', $defaultDirectory) ?? $defaultDirectory);
     $path = realpath(dirname(__DIR__) . '/' . $url);
     return $root !== false && $path !== false && str_starts_with($path, $root . DIRECTORY_SEPARATOR) ? $path : null;
 }

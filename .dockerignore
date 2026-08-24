@@ -1,0 +1,12 @@
+.git
+.env
+.agents
+.codex
+node_modules
+data/*.json
+assets/uploads/projects/*
+!assets/uploads/projects/.gitkeep
+!assets/uploads/projects/.htaccess
+build
+dist
+*.log

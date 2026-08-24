@@ -5,7 +5,7 @@ import { spawnSync } from 'node:child_process';
 
 const root = process.cwd();
 const php = process.env.PHP_BINARY || (process.platform === 'win32' ? 'C:\\xampp\\php\\php.exe' : 'php');
-const phpFiles = ['index.php', 'projects.php', 'project-details.php', '404.php', 'admin/index.php', 'admin/dashboard.php', 'data/projects.php', 'data/site-content.php', 'includes/config.php', 'includes/admin-auth.php', 'includes/Project.php', 'includes/project-store.php', 'includes/project-repository.php', 'includes/site-content-store.php', 'includes/render-project-card.php', 'includes/RateLimiter.php', 'includes/ContactQueue.php', 'scripts/process-contact-queue.php', 'assets/mail/contact.php', 'assets/mail/ResendMailer.php'];
+const phpFiles = ['index.php', 'projects.php', 'project-details.php', '404.php', 'health.php', 'admin/index.php', 'admin/dashboard.php', 'data/projects.php', 'data/site-content.php', 'includes/config.php', 'includes/admin-auth.php', 'includes/Project.php', 'includes/project-store.php', 'includes/project-repository.php', 'includes/site-content-store.php', 'includes/render-project-card.php', 'includes/RateLimiter.php', 'includes/ContactQueue.php', 'scripts/process-contact-queue.php', 'assets/mail/contact.php', 'assets/mail/ResendMailer.php'];
 
 for (const file of phpFiles) {
   const lint = spawnSync(php, ['-l', file], { cwd: root, encoding: 'utf8' });
@@ -48,10 +48,22 @@ assert.match(dashboard, /name="action" value="logout"/);
 assert.doesNotMatch(dashboard, /\?logout=1/);
 assert.match(login, /recordFailedAdminLogin/);
 assert.match(login, /name="csrf"/);
+const adminAuth = await readFile(path.join(root, 'includes/admin-auth.php'), 'utf8');
+assert.match(adminAuth, /SCRIPT_NAME/);
+assert.doesNotMatch(adminAuth, /'path'\s*=>\s*'\/admin'/);
 assert.match(sources[2], /http_response_code\(404\)/);
 
 await access(path.join(root, '.htaccess'));
 await access(path.join(root, 'assets/uploads/projects/.htaccess'));
+for (const deploymentFile of ['Dockerfile', '.dockerignore', 'render.yaml', 'docker/apache.conf', 'docker/php.ini', 'health.php']) {
+  await access(path.join(root, deploymentFile));
+}
+const apacheConfig = await readFile(path.join(root, '.htaccess'), 'utf8');
+assert.match(apacheConfig, /Header always unset X-Powered-By/);
+const renderBlueprint = await readFile(path.join(root, 'render.yaml'), 'utf8');
+assert.match(renderBlueprint, /runtime: docker/);
+assert.match(renderBlueprint, /healthCheckPath: \/health\.php/);
+assert.doesNotMatch(renderBlueprint, /RESEND_API_KEY:\s+re_/);
 
 for (const match of markup.matchAll(/(?:src|href|['"])(assets\/[^"'?#]+)["']/g)) {
   await access(path.join(root, match[1]));

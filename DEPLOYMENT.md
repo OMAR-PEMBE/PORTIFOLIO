@@ -5,7 +5,7 @@
 The contact handler reads its mailboxes from server environment variables; it does not contain a fallback recipient.
 
 - `CONTACT_RECIPIENT` is required and receives submitted enquiries. Set this to your Gmail address if you want enquiries delivered to Gmail.
-- `CONTACT_FROM` is required and must use a domain verified in Resend.
+- `CONTACT_FROM` is required and must be a bare email address. Until you own a domain, use Resend's `onboarding@resend.dev` testing sender. This testing sender can deliver only to the email address associated with your Resend account.
 - `RESEND_API_KEY` is required. Use a restricted sending key and store it only in the server environment.
 
 Configure these values in the hosting control panel, container environment, PHP-FPM pool, or Apache virtual host. For Apache, the virtual-host configuration can contain:
@@ -16,7 +16,19 @@ SetEnv CONTACT_FROM website@the-deployed-domain.tld
 SetEnv RESEND_API_KEY re_replace_with_a_secret_deployment_value
 ```
 
-The recipient and sender are separate settings. For example, `CONTACT_RECIPIENT` may be `yourname@gmail.com`, while `CONTACT_FROM` must remain an address on a domain verified in Resend. The form does not need your Gmail password or Gmail API credentials.
+The recipient and sender are separate settings. For example, `CONTACT_RECIPIENT` may be `yourname@gmail.com`, while `CONTACT_FROM` is `onboarding@resend.dev` during testing and later becomes an address on your verified domain. The form does not need your Gmail password or Gmail API credentials.
+
+### Create the Resend API key
+
+1. Sign in to the Resend dashboard.
+2. Open **API Keys** from the left navigation.
+3. Select **Create API Key**.
+4. Name it `portfolio-render` and select the sending-only permission when offered.
+5. Create the key and copy the value beginning with `re_` immediately. Resend shows the complete secret only at creation time.
+6. Put it in your local `.env` as `RESEND_API_KEY=re_...`. Never paste it into source code, commit it to Git, or send it in chat.
+7. For testing without a domain, set `CONTACT_RECIPIENT` to the exact email address used for your Resend account and set `CONTACT_FROM=onboarding@resend.dev`.
+
+When you later buy a domain, add it in Resend under **Domains**, publish the SPF and DKIM DNS records, wait for verification, and replace `CONTACT_FROM` with a bare address such as `website@yourdomain.com`.
 
 Do not commit production mailbox settings or API keys to the repository. Verify the sender domain in Resend, including the DNS records Resend provides, before enabling the form.
 
@@ -53,3 +65,16 @@ The included Apache `.htaccess` blocks access to internal directories and dotfil
 Keep `CONTACT_QUEUE_DIR`, backups, and logs outside the public document root. The `test_connection.php` diagnostic is intentionally not part of the application; do not recreate or deploy public connection-test endpoints. Configure PHP with `display_errors=Off` and forward `error_log` to private, monitored storage.
 
 Back up `data/projects.json`, `data/site-content.json`, and `assets/uploads/projects` together. Test restoration periodically so records and their uploaded media remain consistent.
+
+## Deploy from GitHub to Render
+
+GitHub stores the repository; the PHP site itself must run as a Render Web Service. This repository includes a Docker runtime and `render.yaml` Blueprint.
+
+1. Confirm `.env` is not staged by running `git status`. Never commit it.
+2. Commit and push the application files, including `Dockerfile`, `docker/`, `health.php`, and `render.yaml`, to GitHub.
+3. In Render, select **New > Blueprint**, connect the GitHub repository, and deploy its `render.yaml`.
+4. When Render requests secret values, provide `ADMIN_PASSWORD_HASH`, `CONTACT_RECIPIENT`, and `RESEND_API_KEY`. Use the password hash, not the plain admin password.
+5. Keep `CONTACT_FROM=onboarding@resend.dev` until a custom domain has been verified in Resend.
+6. Wait for `/health.php` to report healthy, then test the public pages, admin login, and one contact submission at the assigned `onrender.com` HTTPS address.
+
+The free Render instance has an ephemeral filesystem. Admin edits and uploaded project media can disappear on a restart or deployment. For a temporary free deployment, treat the Git-tracked files in `data/` and `assets/img/` as the source of truth. For durable admin editing, attach a persistent disk mounted at `/var/www/storage` on a compatible paid instance; `APP_DATA_DIR` and `UPLOAD_STORAGE_DIR` are already configured beneath that mount. Only files under a persistent disk's mount path survive restarts and deploys.

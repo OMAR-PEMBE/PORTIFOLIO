@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once __DIR__ . '/config.php';
 
 final class ProjectStore
 {
@@ -8,7 +9,11 @@ final class ProjectStore
 
     public function __construct(string $rootDirectory)
     {
-        $this->jsonPath = $rootDirectory . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'projects.json';
+        $dataDirectory = environment('APP_DATA_DIR', $rootDirectory . DIRECTORY_SEPARATOR . 'data') ?? ($rootDirectory . DIRECTORY_SEPARATOR . 'data');
+        if (!is_dir($dataDirectory) && !mkdir($dataDirectory, 0750, true) && !is_dir($dataDirectory)) {
+            throw new RuntimeException('Unable to create application data storage.');
+        }
+        $this->jsonPath = rtrim($dataDirectory, '/\\') . DIRECTORY_SEPARATOR . 'projects.json';
         $this->phpPath = $rootDirectory . DIRECTORY_SEPARATOR . 'data' . DIRECTORY_SEPARATOR . 'projects.php';
     }
 
